@@ -3,20 +3,25 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: IPL Auction Game API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: players
+    description: Player operations
+  - name: teams
+    description: Team operations
+  - name: auction
+    description: Auction operations
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +29,215 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /players:
+    get:
+      operationId: getPlayers
+      tags: [players]
+      summary: Get all players with optional filters
+      parameters:
+        - name: role
+          in: query
+          schema:
+            type: string
+            enum: [Batsman, Bowler, All-rounder, Wicketkeeper]
+        - name: nationality
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: sold
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: List of players
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Player"
+
+  /players/{id}:
+    get:
+      operationId: getPlayer
+      tags: [players]
+      summary: Get a single player
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Player found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Player"
+        "404":
+          description: Player not found
+
+  /teams:
+    get:
+      operationId: getTeams
+      tags: [teams]
+      summary: Get all IPL teams with budgets and squads
+      responses:
+        "200":
+          description: List of teams
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Team"
+
+  /teams/{id}:
+    get:
+      operationId: getTeam
+      tags: [teams]
+      summary: Get single team
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Team found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Team"
+
+  /auction/state:
+    get:
+      operationId: getAuctionState
+      tags: [auction]
+      summary: Get current auction state
+      responses:
+        "200":
+          description: Current auction state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuctionState"
+
+  /auction/start:
+    post:
+      operationId: startAuction
+      tags: [auction]
+      summary: Start a new auction session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StartAuctionRequest"
+      responses:
+        "200":
+          description: Auction started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuctionState"
+
+  /auction/bid:
+    post:
+      operationId: placeBid
+      tags: [auction]
+      summary: Place a bid on the current player
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BidRequest"
+      responses:
+        "200":
+          description: Bid placed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuctionState"
+        "400":
+          description: Invalid bid
+
+  /auction/next:
+    post:
+      operationId: nextPlayer
+      tags: [auction]
+      summary: Advance to the next player (after timer or sold)
+      responses:
+        "200":
+          description: Next player loaded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuctionState"
+
+  /auction/pass:
+    post:
+      operationId: passPlayer
+      tags: [auction]
+      summary: Pass on current player (unsold)
+      responses:
+        "200":
+          description: Player passed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuctionState"
+
+  /auction/reset:
+    post:
+      operationId: resetAuction
+      tags: [auction]
+      summary: Reset the auction entirely
+      responses:
+        "200":
+          description: Auction reset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuctionState"
+
+  /auction/history:
+    get:
+      operationId: getAuctionHistory
+      tags: [auction]
+      summary: Get auction history log
+      responses:
+        "200":
+          description: Auction history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AuctionHistoryEntry"
+
+  /auction/ai-bid:
+    post:
+      operationId: triggerAiBid
+      tags: [auction]
+      summary: Trigger AI bidding round for all AI teams
+      responses:
+        "200":
+          description: AI bids placed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuctionState"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +248,175 @@ components:
       required:
         - status
 
+    Player:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        role:
+          type: string
+          enum: [Batsman, Bowler, All-rounder, Wicketkeeper]
+        basePrice:
+          type: number
+          description: Base price in Crores
+        skillRating:
+          type: integer
+          minimum: 1
+          maximum: 100
+        nationality:
+          type: string
+        sold:
+          type: boolean
+        soldTo:
+          type: string
+          nullable: true
+        soldPrice:
+          type: number
+          nullable: true
+      required:
+        - id
+        - name
+        - role
+        - basePrice
+        - skillRating
+        - nationality
+        - sold
+
+    Team:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        shortName:
+          type: string
+        color:
+          type: string
+        budget:
+          type: number
+          description: Remaining budget in Crores
+        initialBudget:
+          type: number
+        players:
+          type: array
+          items:
+            $ref: "#/components/schemas/Player"
+        maxSquadSize:
+          type: integer
+      required:
+        - id
+        - name
+        - shortName
+        - color
+        - budget
+        - initialBudget
+        - players
+        - maxSquadSize
+
+    AuctionState:
+      type: object
+      properties:
+        started:
+          type: boolean
+        currentPlayer:
+          $ref: "#/components/schemas/Player"
+          nullable: true
+        currentBid:
+          type: number
+        currentBidder:
+          type: string
+          nullable: true
+        timer:
+          type: integer
+          description: Seconds remaining
+        teams:
+          type: array
+          items:
+            $ref: "#/components/schemas/Team"
+        soldAnimation:
+          type: boolean
+        status:
+          type: string
+          enum: [idle, bidding, sold, unsold, finished]
+        difficulty:
+          type: string
+          enum: [easy, medium, hard]
+        userTeamId:
+          type: string
+          nullable: true
+        playerIndex:
+          type: integer
+        totalPlayers:
+          type: integer
+      required:
+        - started
+        - currentBid
+        - timer
+        - teams
+        - soldAnimation
+        - status
+        - difficulty
+        - playerIndex
+        - totalPlayers
+
+    StartAuctionRequest:
+      type: object
+      properties:
+        userTeamId:
+          type: string
+        budget:
+          type: number
+        difficulty:
+          type: string
+          enum: [easy, medium, hard]
+      required:
+        - userTeamId
+        - budget
+        - difficulty
+
+    BidRequest:
+      type: object
+      properties:
+        teamId:
+          type: string
+        amount:
+          type: number
+      required:
+        - teamId
+        - amount
+
+    AuctionHistoryEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+        playerId:
+          type: integer
+        playerName:
+          type: string
+        playerRole:
+          type: string
+        teamId:
+          type: string
+          nullable: true
+        teamName:
+          type: string
+          nullable: true
+        finalPrice:
+          type: number
+        status:
+          type: string
+          enum: [sold, unsold]
+        timestamp:
+          type: string
+      required:
+        - id
+        - playerId
+        - playerName
+        - playerRole
+        - finalPrice
+        - status
+        - timestamp
