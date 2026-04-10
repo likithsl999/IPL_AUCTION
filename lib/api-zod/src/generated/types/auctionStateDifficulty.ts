@@ -13,4 +13,5 @@ export const AuctionStateDifficulty = {
   easy: "easy",
   medium: "medium",
   hard: "hard",
+  extreme: "extreme",
 } as const;

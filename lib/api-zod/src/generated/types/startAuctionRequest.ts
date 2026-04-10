@@ -11,4 +11,6 @@ export interface StartAuctionRequest {
   userTeamId: string;
   budget: number;
   difficulty: StartAuctionRequestDifficulty;
+  /** Number of players to include (0 means full pool) */
+  playerCount?: number;
 }

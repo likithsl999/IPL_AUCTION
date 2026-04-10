@@ -33,6 +33,33 @@ export interface Player {
   sold: boolean;
   soldTo?: string | null;
   soldPrice?: number | null;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  battingRating: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  bowlingRating: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  fieldingRating: number;
+  age: number;
+  /** IPL seasons */
+  experience: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  form: number;
+  strikeRate: number;
+  economy: number;
+  strengths: string;
+  weaknesses: string;
 }
 
 export interface Team {
@@ -65,6 +92,7 @@ export const AuctionStateDifficulty = {
   easy: "easy",
   medium: "medium",
   hard: "hard",
+  extreme: "extreme",
 } as const;
 
 export interface AuctionState {
@@ -81,6 +109,7 @@ export interface AuctionState {
   userTeamId?: string | null;
   playerIndex: number;
   totalPlayers: number;
+  playerCount?: string;
 }
 
 export type StartAuctionRequestDifficulty =
@@ -90,12 +119,15 @@ export const StartAuctionRequestDifficulty = {
   easy: "easy",
   medium: "medium",
   hard: "hard",
+  extreme: "extreme",
 } as const;
 
 export interface StartAuctionRequest {
   userTeamId: string;
   budget: number;
   difficulty: StartAuctionRequestDifficulty;
+  /** Number of players to include (0 means full pool) */
+  playerCount?: number;
 }
 
 export interface BidRequest {

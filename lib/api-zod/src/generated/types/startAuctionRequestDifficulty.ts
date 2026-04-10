@@ -13,4 +13,5 @@ export const StartAuctionRequestDifficulty = {
   easy: "easy",
   medium: "medium",
   hard: "hard",
+  extreme: "extreme",
 } as const;

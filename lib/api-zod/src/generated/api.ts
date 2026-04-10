@@ -28,6 +28,14 @@ export const GetPlayersQueryParams = zod.object({
 
 export const getPlayersResponseSkillRatingMax = 100;
 
+export const getPlayersResponseBattingRatingMax = 100;
+
+export const getPlayersResponseBowlingRatingMax = 100;
+
+export const getPlayersResponseFieldingRatingMax = 100;
+
+export const getPlayersResponseFormMax = 100;
+
 export const GetPlayersResponseItem = zod.object({
   id: zod.number(),
   name: zod.string(),
@@ -38,6 +46,16 @@ export const GetPlayersResponseItem = zod.object({
   sold: zod.boolean(),
   soldTo: zod.string().nullish(),
   soldPrice: zod.number().nullish(),
+  battingRating: zod.number().min(1).max(getPlayersResponseBattingRatingMax),
+  bowlingRating: zod.number().min(1).max(getPlayersResponseBowlingRatingMax),
+  fieldingRating: zod.number().min(1).max(getPlayersResponseFieldingRatingMax),
+  age: zod.number(),
+  experience: zod.number().describe("IPL seasons"),
+  form: zod.number().min(1).max(getPlayersResponseFormMax),
+  strikeRate: zod.number(),
+  economy: zod.number(),
+  strengths: zod.string(),
+  weaknesses: zod.string(),
 });
 export const GetPlayersResponse = zod.array(GetPlayersResponseItem);
 
@@ -50,6 +68,14 @@ export const GetPlayerParams = zod.object({
 
 export const getPlayerResponseSkillRatingMax = 100;
 
+export const getPlayerResponseBattingRatingMax = 100;
+
+export const getPlayerResponseBowlingRatingMax = 100;
+
+export const getPlayerResponseFieldingRatingMax = 100;
+
+export const getPlayerResponseFormMax = 100;
+
 export const GetPlayerResponse = zod.object({
   id: zod.number(),
   name: zod.string(),
@@ -60,12 +86,30 @@ export const GetPlayerResponse = zod.object({
   sold: zod.boolean(),
   soldTo: zod.string().nullish(),
   soldPrice: zod.number().nullish(),
+  battingRating: zod.number().min(1).max(getPlayerResponseBattingRatingMax),
+  bowlingRating: zod.number().min(1).max(getPlayerResponseBowlingRatingMax),
+  fieldingRating: zod.number().min(1).max(getPlayerResponseFieldingRatingMax),
+  age: zod.number(),
+  experience: zod.number().describe("IPL seasons"),
+  form: zod.number().min(1).max(getPlayerResponseFormMax),
+  strikeRate: zod.number(),
+  economy: zod.number(),
+  strengths: zod.string(),
+  weaknesses: zod.string(),
 });
 
 /**
  * @summary Get all IPL teams with budgets and squads
  */
 export const getTeamsResponsePlayersItemSkillRatingMax = 100;
+
+export const getTeamsResponsePlayersItemBattingRatingMax = 100;
+
+export const getTeamsResponsePlayersItemBowlingRatingMax = 100;
+
+export const getTeamsResponsePlayersItemFieldingRatingMax = 100;
+
+export const getTeamsResponsePlayersItemFormMax = 100;
 
 export const GetTeamsResponseItem = zod.object({
   id: zod.string(),
@@ -88,6 +132,25 @@ export const GetTeamsResponseItem = zod.object({
       sold: zod.boolean(),
       soldTo: zod.string().nullish(),
       soldPrice: zod.number().nullish(),
+      battingRating: zod
+        .number()
+        .min(1)
+        .max(getTeamsResponsePlayersItemBattingRatingMax),
+      bowlingRating: zod
+        .number()
+        .min(1)
+        .max(getTeamsResponsePlayersItemBowlingRatingMax),
+      fieldingRating: zod
+        .number()
+        .min(1)
+        .max(getTeamsResponsePlayersItemFieldingRatingMax),
+      age: zod.number(),
+      experience: zod.number().describe("IPL seasons"),
+      form: zod.number().min(1).max(getTeamsResponsePlayersItemFormMax),
+      strikeRate: zod.number(),
+      economy: zod.number(),
+      strengths: zod.string(),
+      weaknesses: zod.string(),
     }),
   ),
   maxSquadSize: zod.number(),
@@ -102,6 +165,14 @@ export const GetTeamParams = zod.object({
 });
 
 export const getTeamResponsePlayersItemSkillRatingMax = 100;
+
+export const getTeamResponsePlayersItemBattingRatingMax = 100;
+
+export const getTeamResponsePlayersItemBowlingRatingMax = 100;
+
+export const getTeamResponsePlayersItemFieldingRatingMax = 100;
+
+export const getTeamResponsePlayersItemFormMax = 100;
 
 export const GetTeamResponse = zod.object({
   id: zod.string(),
@@ -124,6 +195,25 @@ export const GetTeamResponse = zod.object({
       sold: zod.boolean(),
       soldTo: zod.string().nullish(),
       soldPrice: zod.number().nullish(),
+      battingRating: zod
+        .number()
+        .min(1)
+        .max(getTeamResponsePlayersItemBattingRatingMax),
+      bowlingRating: zod
+        .number()
+        .min(1)
+        .max(getTeamResponsePlayersItemBowlingRatingMax),
+      fieldingRating: zod
+        .number()
+        .min(1)
+        .max(getTeamResponsePlayersItemFieldingRatingMax),
+      age: zod.number(),
+      experience: zod.number().describe("IPL seasons"),
+      form: zod.number().min(1).max(getTeamResponsePlayersItemFormMax),
+      strikeRate: zod.number(),
+      economy: zod.number(),
+      strengths: zod.string(),
+      weaknesses: zod.string(),
     }),
   ),
   maxSquadSize: zod.number(),
@@ -134,7 +224,23 @@ export const GetTeamResponse = zod.object({
  */
 export const getAuctionStateResponseCurrentPlayerSkillRatingMax = 100;
 
+export const getAuctionStateResponseCurrentPlayerBattingRatingMax = 100;
+
+export const getAuctionStateResponseCurrentPlayerBowlingRatingMax = 100;
+
+export const getAuctionStateResponseCurrentPlayerFieldingRatingMax = 100;
+
+export const getAuctionStateResponseCurrentPlayerFormMax = 100;
+
 export const getAuctionStateResponseTeamsItemPlayersItemSkillRatingMax = 100;
+
+export const getAuctionStateResponseTeamsItemPlayersItemBattingRatingMax = 100;
+
+export const getAuctionStateResponseTeamsItemPlayersItemBowlingRatingMax = 100;
+
+export const getAuctionStateResponseTeamsItemPlayersItemFieldingRatingMax = 100;
+
+export const getAuctionStateResponseTeamsItemPlayersItemFormMax = 100;
 
 export const GetAuctionStateResponse = zod.object({
   started: zod.boolean(),
@@ -152,6 +258,28 @@ export const GetAuctionStateResponse = zod.object({
       sold: zod.boolean(),
       soldTo: zod.string().nullish(),
       soldPrice: zod.number().nullish(),
+      battingRating: zod
+        .number()
+        .min(1)
+        .max(getAuctionStateResponseCurrentPlayerBattingRatingMax),
+      bowlingRating: zod
+        .number()
+        .min(1)
+        .max(getAuctionStateResponseCurrentPlayerBowlingRatingMax),
+      fieldingRating: zod
+        .number()
+        .min(1)
+        .max(getAuctionStateResponseCurrentPlayerFieldingRatingMax),
+      age: zod.number(),
+      experience: zod.number().describe("IPL seasons"),
+      form: zod
+        .number()
+        .min(1)
+        .max(getAuctionStateResponseCurrentPlayerFormMax),
+      strikeRate: zod.number(),
+      economy: zod.number(),
+      strengths: zod.string(),
+      weaknesses: zod.string(),
     })
     .nullish(),
   currentBid: zod.number(),
@@ -179,6 +307,28 @@ export const GetAuctionStateResponse = zod.object({
           sold: zod.boolean(),
           soldTo: zod.string().nullish(),
           soldPrice: zod.number().nullish(),
+          battingRating: zod
+            .number()
+            .min(1)
+            .max(getAuctionStateResponseTeamsItemPlayersItemBattingRatingMax),
+          bowlingRating: zod
+            .number()
+            .min(1)
+            .max(getAuctionStateResponseTeamsItemPlayersItemBowlingRatingMax),
+          fieldingRating: zod
+            .number()
+            .min(1)
+            .max(getAuctionStateResponseTeamsItemPlayersItemFieldingRatingMax),
+          age: zod.number(),
+          experience: zod.number().describe("IPL seasons"),
+          form: zod
+            .number()
+            .min(1)
+            .max(getAuctionStateResponseTeamsItemPlayersItemFormMax),
+          strikeRate: zod.number(),
+          economy: zod.number(),
+          strengths: zod.string(),
+          weaknesses: zod.string(),
         }),
       ),
       maxSquadSize: zod.number(),
@@ -186,10 +336,11 @@ export const GetAuctionStateResponse = zod.object({
   ),
   soldAnimation: zod.boolean(),
   status: zod.enum(["idle", "bidding", "sold", "unsold", "finished"]),
-  difficulty: zod.enum(["easy", "medium", "hard"]),
+  difficulty: zod.enum(["easy", "medium", "hard", "extreme"]),
   userTeamId: zod.string().nullish(),
   playerIndex: zod.number(),
   totalPlayers: zod.number(),
+  playerCount: zod.string().optional(),
 });
 
 /**
@@ -198,12 +349,32 @@ export const GetAuctionStateResponse = zod.object({
 export const StartAuctionBody = zod.object({
   userTeamId: zod.string(),
   budget: zod.number(),
-  difficulty: zod.enum(["easy", "medium", "hard"]),
+  difficulty: zod.enum(["easy", "medium", "hard", "extreme"]),
+  playerCount: zod
+    .number()
+    .optional()
+    .describe("Number of players to include (0 means full pool)"),
 });
 
 export const startAuctionResponseCurrentPlayerSkillRatingMax = 100;
 
+export const startAuctionResponseCurrentPlayerBattingRatingMax = 100;
+
+export const startAuctionResponseCurrentPlayerBowlingRatingMax = 100;
+
+export const startAuctionResponseCurrentPlayerFieldingRatingMax = 100;
+
+export const startAuctionResponseCurrentPlayerFormMax = 100;
+
 export const startAuctionResponseTeamsItemPlayersItemSkillRatingMax = 100;
+
+export const startAuctionResponseTeamsItemPlayersItemBattingRatingMax = 100;
+
+export const startAuctionResponseTeamsItemPlayersItemBowlingRatingMax = 100;
+
+export const startAuctionResponseTeamsItemPlayersItemFieldingRatingMax = 100;
+
+export const startAuctionResponseTeamsItemPlayersItemFormMax = 100;
 
 export const StartAuctionResponse = zod.object({
   started: zod.boolean(),
@@ -221,6 +392,25 @@ export const StartAuctionResponse = zod.object({
       sold: zod.boolean(),
       soldTo: zod.string().nullish(),
       soldPrice: zod.number().nullish(),
+      battingRating: zod
+        .number()
+        .min(1)
+        .max(startAuctionResponseCurrentPlayerBattingRatingMax),
+      bowlingRating: zod
+        .number()
+        .min(1)
+        .max(startAuctionResponseCurrentPlayerBowlingRatingMax),
+      fieldingRating: zod
+        .number()
+        .min(1)
+        .max(startAuctionResponseCurrentPlayerFieldingRatingMax),
+      age: zod.number(),
+      experience: zod.number().describe("IPL seasons"),
+      form: zod.number().min(1).max(startAuctionResponseCurrentPlayerFormMax),
+      strikeRate: zod.number(),
+      economy: zod.number(),
+      strengths: zod.string(),
+      weaknesses: zod.string(),
     })
     .nullish(),
   currentBid: zod.number(),
@@ -248,6 +438,28 @@ export const StartAuctionResponse = zod.object({
           sold: zod.boolean(),
           soldTo: zod.string().nullish(),
           soldPrice: zod.number().nullish(),
+          battingRating: zod
+            .number()
+            .min(1)
+            .max(startAuctionResponseTeamsItemPlayersItemBattingRatingMax),
+          bowlingRating: zod
+            .number()
+            .min(1)
+            .max(startAuctionResponseTeamsItemPlayersItemBowlingRatingMax),
+          fieldingRating: zod
+            .number()
+            .min(1)
+            .max(startAuctionResponseTeamsItemPlayersItemFieldingRatingMax),
+          age: zod.number(),
+          experience: zod.number().describe("IPL seasons"),
+          form: zod
+            .number()
+            .min(1)
+            .max(startAuctionResponseTeamsItemPlayersItemFormMax),
+          strikeRate: zod.number(),
+          economy: zod.number(),
+          strengths: zod.string(),
+          weaknesses: zod.string(),
         }),
       ),
       maxSquadSize: zod.number(),
@@ -255,10 +467,11 @@ export const StartAuctionResponse = zod.object({
   ),
   soldAnimation: zod.boolean(),
   status: zod.enum(["idle", "bidding", "sold", "unsold", "finished"]),
-  difficulty: zod.enum(["easy", "medium", "hard"]),
+  difficulty: zod.enum(["easy", "medium", "hard", "extreme"]),
   userTeamId: zod.string().nullish(),
   playerIndex: zod.number(),
   totalPlayers: zod.number(),
+  playerCount: zod.string().optional(),
 });
 
 /**
@@ -271,7 +484,23 @@ export const PlaceBidBody = zod.object({
 
 export const placeBidResponseCurrentPlayerSkillRatingMax = 100;
 
+export const placeBidResponseCurrentPlayerBattingRatingMax = 100;
+
+export const placeBidResponseCurrentPlayerBowlingRatingMax = 100;
+
+export const placeBidResponseCurrentPlayerFieldingRatingMax = 100;
+
+export const placeBidResponseCurrentPlayerFormMax = 100;
+
 export const placeBidResponseTeamsItemPlayersItemSkillRatingMax = 100;
+
+export const placeBidResponseTeamsItemPlayersItemBattingRatingMax = 100;
+
+export const placeBidResponseTeamsItemPlayersItemBowlingRatingMax = 100;
+
+export const placeBidResponseTeamsItemPlayersItemFieldingRatingMax = 100;
+
+export const placeBidResponseTeamsItemPlayersItemFormMax = 100;
 
 export const PlaceBidResponse = zod.object({
   started: zod.boolean(),
@@ -289,6 +518,25 @@ export const PlaceBidResponse = zod.object({
       sold: zod.boolean(),
       soldTo: zod.string().nullish(),
       soldPrice: zod.number().nullish(),
+      battingRating: zod
+        .number()
+        .min(1)
+        .max(placeBidResponseCurrentPlayerBattingRatingMax),
+      bowlingRating: zod
+        .number()
+        .min(1)
+        .max(placeBidResponseCurrentPlayerBowlingRatingMax),
+      fieldingRating: zod
+        .number()
+        .min(1)
+        .max(placeBidResponseCurrentPlayerFieldingRatingMax),
+      age: zod.number(),
+      experience: zod.number().describe("IPL seasons"),
+      form: zod.number().min(1).max(placeBidResponseCurrentPlayerFormMax),
+      strikeRate: zod.number(),
+      economy: zod.number(),
+      strengths: zod.string(),
+      weaknesses: zod.string(),
     })
     .nullish(),
   currentBid: zod.number(),
@@ -316,6 +564,28 @@ export const PlaceBidResponse = zod.object({
           sold: zod.boolean(),
           soldTo: zod.string().nullish(),
           soldPrice: zod.number().nullish(),
+          battingRating: zod
+            .number()
+            .min(1)
+            .max(placeBidResponseTeamsItemPlayersItemBattingRatingMax),
+          bowlingRating: zod
+            .number()
+            .min(1)
+            .max(placeBidResponseTeamsItemPlayersItemBowlingRatingMax),
+          fieldingRating: zod
+            .number()
+            .min(1)
+            .max(placeBidResponseTeamsItemPlayersItemFieldingRatingMax),
+          age: zod.number(),
+          experience: zod.number().describe("IPL seasons"),
+          form: zod
+            .number()
+            .min(1)
+            .max(placeBidResponseTeamsItemPlayersItemFormMax),
+          strikeRate: zod.number(),
+          economy: zod.number(),
+          strengths: zod.string(),
+          weaknesses: zod.string(),
         }),
       ),
       maxSquadSize: zod.number(),
@@ -323,10 +593,11 @@ export const PlaceBidResponse = zod.object({
   ),
   soldAnimation: zod.boolean(),
   status: zod.enum(["idle", "bidding", "sold", "unsold", "finished"]),
-  difficulty: zod.enum(["easy", "medium", "hard"]),
+  difficulty: zod.enum(["easy", "medium", "hard", "extreme"]),
   userTeamId: zod.string().nullish(),
   playerIndex: zod.number(),
   totalPlayers: zod.number(),
+  playerCount: zod.string().optional(),
 });
 
 /**
@@ -334,7 +605,23 @@ export const PlaceBidResponse = zod.object({
  */
 export const nextPlayerResponseCurrentPlayerSkillRatingMax = 100;
 
+export const nextPlayerResponseCurrentPlayerBattingRatingMax = 100;
+
+export const nextPlayerResponseCurrentPlayerBowlingRatingMax = 100;
+
+export const nextPlayerResponseCurrentPlayerFieldingRatingMax = 100;
+
+export const nextPlayerResponseCurrentPlayerFormMax = 100;
+
 export const nextPlayerResponseTeamsItemPlayersItemSkillRatingMax = 100;
+
+export const nextPlayerResponseTeamsItemPlayersItemBattingRatingMax = 100;
+
+export const nextPlayerResponseTeamsItemPlayersItemBowlingRatingMax = 100;
+
+export const nextPlayerResponseTeamsItemPlayersItemFieldingRatingMax = 100;
+
+export const nextPlayerResponseTeamsItemPlayersItemFormMax = 100;
 
 export const NextPlayerResponse = zod.object({
   started: zod.boolean(),
@@ -352,6 +639,25 @@ export const NextPlayerResponse = zod.object({
       sold: zod.boolean(),
       soldTo: zod.string().nullish(),
       soldPrice: zod.number().nullish(),
+      battingRating: zod
+        .number()
+        .min(1)
+        .max(nextPlayerResponseCurrentPlayerBattingRatingMax),
+      bowlingRating: zod
+        .number()
+        .min(1)
+        .max(nextPlayerResponseCurrentPlayerBowlingRatingMax),
+      fieldingRating: zod
+        .number()
+        .min(1)
+        .max(nextPlayerResponseCurrentPlayerFieldingRatingMax),
+      age: zod.number(),
+      experience: zod.number().describe("IPL seasons"),
+      form: zod.number().min(1).max(nextPlayerResponseCurrentPlayerFormMax),
+      strikeRate: zod.number(),
+      economy: zod.number(),
+      strengths: zod.string(),
+      weaknesses: zod.string(),
     })
     .nullish(),
   currentBid: zod.number(),
@@ -379,6 +685,28 @@ export const NextPlayerResponse = zod.object({
           sold: zod.boolean(),
           soldTo: zod.string().nullish(),
           soldPrice: zod.number().nullish(),
+          battingRating: zod
+            .number()
+            .min(1)
+            .max(nextPlayerResponseTeamsItemPlayersItemBattingRatingMax),
+          bowlingRating: zod
+            .number()
+            .min(1)
+            .max(nextPlayerResponseTeamsItemPlayersItemBowlingRatingMax),
+          fieldingRating: zod
+            .number()
+            .min(1)
+            .max(nextPlayerResponseTeamsItemPlayersItemFieldingRatingMax),
+          age: zod.number(),
+          experience: zod.number().describe("IPL seasons"),
+          form: zod
+            .number()
+            .min(1)
+            .max(nextPlayerResponseTeamsItemPlayersItemFormMax),
+          strikeRate: zod.number(),
+          economy: zod.number(),
+          strengths: zod.string(),
+          weaknesses: zod.string(),
         }),
       ),
       maxSquadSize: zod.number(),
@@ -386,10 +714,11 @@ export const NextPlayerResponse = zod.object({
   ),
   soldAnimation: zod.boolean(),
   status: zod.enum(["idle", "bidding", "sold", "unsold", "finished"]),
-  difficulty: zod.enum(["easy", "medium", "hard"]),
+  difficulty: zod.enum(["easy", "medium", "hard", "extreme"]),
   userTeamId: zod.string().nullish(),
   playerIndex: zod.number(),
   totalPlayers: zod.number(),
+  playerCount: zod.string().optional(),
 });
 
 /**
@@ -397,7 +726,23 @@ export const NextPlayerResponse = zod.object({
  */
 export const passPlayerResponseCurrentPlayerSkillRatingMax = 100;
 
+export const passPlayerResponseCurrentPlayerBattingRatingMax = 100;
+
+export const passPlayerResponseCurrentPlayerBowlingRatingMax = 100;
+
+export const passPlayerResponseCurrentPlayerFieldingRatingMax = 100;
+
+export const passPlayerResponseCurrentPlayerFormMax = 100;
+
 export const passPlayerResponseTeamsItemPlayersItemSkillRatingMax = 100;
+
+export const passPlayerResponseTeamsItemPlayersItemBattingRatingMax = 100;
+
+export const passPlayerResponseTeamsItemPlayersItemBowlingRatingMax = 100;
+
+export const passPlayerResponseTeamsItemPlayersItemFieldingRatingMax = 100;
+
+export const passPlayerResponseTeamsItemPlayersItemFormMax = 100;
 
 export const PassPlayerResponse = zod.object({
   started: zod.boolean(),
@@ -415,6 +760,25 @@ export const PassPlayerResponse = zod.object({
       sold: zod.boolean(),
       soldTo: zod.string().nullish(),
       soldPrice: zod.number().nullish(),
+      battingRating: zod
+        .number()
+        .min(1)
+        .max(passPlayerResponseCurrentPlayerBattingRatingMax),
+      bowlingRating: zod
+        .number()
+        .min(1)
+        .max(passPlayerResponseCurrentPlayerBowlingRatingMax),
+      fieldingRating: zod
+        .number()
+        .min(1)
+        .max(passPlayerResponseCurrentPlayerFieldingRatingMax),
+      age: zod.number(),
+      experience: zod.number().describe("IPL seasons"),
+      form: zod.number().min(1).max(passPlayerResponseCurrentPlayerFormMax),
+      strikeRate: zod.number(),
+      economy: zod.number(),
+      strengths: zod.string(),
+      weaknesses: zod.string(),
     })
     .nullish(),
   currentBid: zod.number(),
@@ -442,6 +806,28 @@ export const PassPlayerResponse = zod.object({
           sold: zod.boolean(),
           soldTo: zod.string().nullish(),
           soldPrice: zod.number().nullish(),
+          battingRating: zod
+            .number()
+            .min(1)
+            .max(passPlayerResponseTeamsItemPlayersItemBattingRatingMax),
+          bowlingRating: zod
+            .number()
+            .min(1)
+            .max(passPlayerResponseTeamsItemPlayersItemBowlingRatingMax),
+          fieldingRating: zod
+            .number()
+            .min(1)
+            .max(passPlayerResponseTeamsItemPlayersItemFieldingRatingMax),
+          age: zod.number(),
+          experience: zod.number().describe("IPL seasons"),
+          form: zod
+            .number()
+            .min(1)
+            .max(passPlayerResponseTeamsItemPlayersItemFormMax),
+          strikeRate: zod.number(),
+          economy: zod.number(),
+          strengths: zod.string(),
+          weaknesses: zod.string(),
         }),
       ),
       maxSquadSize: zod.number(),
@@ -449,10 +835,11 @@ export const PassPlayerResponse = zod.object({
   ),
   soldAnimation: zod.boolean(),
   status: zod.enum(["idle", "bidding", "sold", "unsold", "finished"]),
-  difficulty: zod.enum(["easy", "medium", "hard"]),
+  difficulty: zod.enum(["easy", "medium", "hard", "extreme"]),
   userTeamId: zod.string().nullish(),
   playerIndex: zod.number(),
   totalPlayers: zod.number(),
+  playerCount: zod.string().optional(),
 });
 
 /**
@@ -460,7 +847,23 @@ export const PassPlayerResponse = zod.object({
  */
 export const resetAuctionResponseCurrentPlayerSkillRatingMax = 100;
 
+export const resetAuctionResponseCurrentPlayerBattingRatingMax = 100;
+
+export const resetAuctionResponseCurrentPlayerBowlingRatingMax = 100;
+
+export const resetAuctionResponseCurrentPlayerFieldingRatingMax = 100;
+
+export const resetAuctionResponseCurrentPlayerFormMax = 100;
+
 export const resetAuctionResponseTeamsItemPlayersItemSkillRatingMax = 100;
+
+export const resetAuctionResponseTeamsItemPlayersItemBattingRatingMax = 100;
+
+export const resetAuctionResponseTeamsItemPlayersItemBowlingRatingMax = 100;
+
+export const resetAuctionResponseTeamsItemPlayersItemFieldingRatingMax = 100;
+
+export const resetAuctionResponseTeamsItemPlayersItemFormMax = 100;
 
 export const ResetAuctionResponse = zod.object({
   started: zod.boolean(),
@@ -478,6 +881,25 @@ export const ResetAuctionResponse = zod.object({
       sold: zod.boolean(),
       soldTo: zod.string().nullish(),
       soldPrice: zod.number().nullish(),
+      battingRating: zod
+        .number()
+        .min(1)
+        .max(resetAuctionResponseCurrentPlayerBattingRatingMax),
+      bowlingRating: zod
+        .number()
+        .min(1)
+        .max(resetAuctionResponseCurrentPlayerBowlingRatingMax),
+      fieldingRating: zod
+        .number()
+        .min(1)
+        .max(resetAuctionResponseCurrentPlayerFieldingRatingMax),
+      age: zod.number(),
+      experience: zod.number().describe("IPL seasons"),
+      form: zod.number().min(1).max(resetAuctionResponseCurrentPlayerFormMax),
+      strikeRate: zod.number(),
+      economy: zod.number(),
+      strengths: zod.string(),
+      weaknesses: zod.string(),
     })
     .nullish(),
   currentBid: zod.number(),
@@ -505,6 +927,28 @@ export const ResetAuctionResponse = zod.object({
           sold: zod.boolean(),
           soldTo: zod.string().nullish(),
           soldPrice: zod.number().nullish(),
+          battingRating: zod
+            .number()
+            .min(1)
+            .max(resetAuctionResponseTeamsItemPlayersItemBattingRatingMax),
+          bowlingRating: zod
+            .number()
+            .min(1)
+            .max(resetAuctionResponseTeamsItemPlayersItemBowlingRatingMax),
+          fieldingRating: zod
+            .number()
+            .min(1)
+            .max(resetAuctionResponseTeamsItemPlayersItemFieldingRatingMax),
+          age: zod.number(),
+          experience: zod.number().describe("IPL seasons"),
+          form: zod
+            .number()
+            .min(1)
+            .max(resetAuctionResponseTeamsItemPlayersItemFormMax),
+          strikeRate: zod.number(),
+          economy: zod.number(),
+          strengths: zod.string(),
+          weaknesses: zod.string(),
         }),
       ),
       maxSquadSize: zod.number(),
@@ -512,10 +956,11 @@ export const ResetAuctionResponse = zod.object({
   ),
   soldAnimation: zod.boolean(),
   status: zod.enum(["idle", "bidding", "sold", "unsold", "finished"]),
-  difficulty: zod.enum(["easy", "medium", "hard"]),
+  difficulty: zod.enum(["easy", "medium", "hard", "extreme"]),
   userTeamId: zod.string().nullish(),
   playerIndex: zod.number(),
   totalPlayers: zod.number(),
+  playerCount: zod.string().optional(),
 });
 
 /**
@@ -541,7 +986,23 @@ export const GetAuctionHistoryResponse = zod.array(
  */
 export const triggerAiBidResponseCurrentPlayerSkillRatingMax = 100;
 
+export const triggerAiBidResponseCurrentPlayerBattingRatingMax = 100;
+
+export const triggerAiBidResponseCurrentPlayerBowlingRatingMax = 100;
+
+export const triggerAiBidResponseCurrentPlayerFieldingRatingMax = 100;
+
+export const triggerAiBidResponseCurrentPlayerFormMax = 100;
+
 export const triggerAiBidResponseTeamsItemPlayersItemSkillRatingMax = 100;
+
+export const triggerAiBidResponseTeamsItemPlayersItemBattingRatingMax = 100;
+
+export const triggerAiBidResponseTeamsItemPlayersItemBowlingRatingMax = 100;
+
+export const triggerAiBidResponseTeamsItemPlayersItemFieldingRatingMax = 100;
+
+export const triggerAiBidResponseTeamsItemPlayersItemFormMax = 100;
 
 export const TriggerAiBidResponse = zod.object({
   started: zod.boolean(),
@@ -559,6 +1020,25 @@ export const TriggerAiBidResponse = zod.object({
       sold: zod.boolean(),
       soldTo: zod.string().nullish(),
       soldPrice: zod.number().nullish(),
+      battingRating: zod
+        .number()
+        .min(1)
+        .max(triggerAiBidResponseCurrentPlayerBattingRatingMax),
+      bowlingRating: zod
+        .number()
+        .min(1)
+        .max(triggerAiBidResponseCurrentPlayerBowlingRatingMax),
+      fieldingRating: zod
+        .number()
+        .min(1)
+        .max(triggerAiBidResponseCurrentPlayerFieldingRatingMax),
+      age: zod.number(),
+      experience: zod.number().describe("IPL seasons"),
+      form: zod.number().min(1).max(triggerAiBidResponseCurrentPlayerFormMax),
+      strikeRate: zod.number(),
+      economy: zod.number(),
+      strengths: zod.string(),
+      weaknesses: zod.string(),
     })
     .nullish(),
   currentBid: zod.number(),
@@ -586,6 +1066,28 @@ export const TriggerAiBidResponse = zod.object({
           sold: zod.boolean(),
           soldTo: zod.string().nullish(),
           soldPrice: zod.number().nullish(),
+          battingRating: zod
+            .number()
+            .min(1)
+            .max(triggerAiBidResponseTeamsItemPlayersItemBattingRatingMax),
+          bowlingRating: zod
+            .number()
+            .min(1)
+            .max(triggerAiBidResponseTeamsItemPlayersItemBowlingRatingMax),
+          fieldingRating: zod
+            .number()
+            .min(1)
+            .max(triggerAiBidResponseTeamsItemPlayersItemFieldingRatingMax),
+          age: zod.number(),
+          experience: zod.number().describe("IPL seasons"),
+          form: zod
+            .number()
+            .min(1)
+            .max(triggerAiBidResponseTeamsItemPlayersItemFormMax),
+          strikeRate: zod.number(),
+          economy: zod.number(),
+          strengths: zod.string(),
+          weaknesses: zod.string(),
         }),
       ),
       maxSquadSize: zod.number(),
@@ -593,8 +1095,9 @@ export const TriggerAiBidResponse = zod.object({
   ),
   soldAnimation: zod.boolean(),
   status: zod.enum(["idle", "bidding", "sold", "unsold", "finished"]),
-  difficulty: zod.enum(["easy", "medium", "hard"]),
+  difficulty: zod.enum(["easy", "medium", "hard", "extreme"]),
   userTeamId: zod.string().nullish(),
   playerIndex: zod.number(),
   totalPlayers: zod.number(),
+  playerCount: zod.string().optional(),
 });

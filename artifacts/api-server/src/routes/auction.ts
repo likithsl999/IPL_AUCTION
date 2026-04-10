@@ -8,7 +8,7 @@ import {
   buildPublicState,
 } from "../data/auction-state.js";
 import { runAiBidRound } from "../data/ai-bidder.js";
-import { buildAllPlayers } from "../data/players-seed.js";
+import { buildAllPlayers, slicePlayers } from "../data/players-seed.js";
 import { IPL_TEAMS } from "../data/teams.js";
 import {
   StartAuctionBody,
@@ -17,6 +17,10 @@ import {
 import type { AuctionHistoryEntry } from "../data/auction-state.js";
 
 const router = Router();
+
+// Default timer values
+const TIMER_DEFAULT = 5;  // seconds at auction start
+const TIMER_ON_BID = 3;   // seconds reset when a new bid is placed
 
 // GET /api/auction/state
 router.get("/state", (req, res) => {
@@ -27,75 +31,71 @@ router.get("/state", (req, res) => {
 router.post("/start", async (req, res) => {
   try {
     const body = StartAuctionBody.parse(req.body);
-    const { userTeamId, budget, difficulty } = body;
+    const { userTeamId, budget, difficulty, playerCount } = body as any;
 
-    // Validate team
     const teamConfig = IPL_TEAMS.find((t) => t.id === userTeamId);
     if (!teamConfig) {
       return res.status(400).json({ error: "Invalid team ID" });
     }
 
-    // Reset and seed players into DB
     resetAuctionState();
 
-    // Seed players if not already seeded
-    const existingCount = await db.select().from(playersTable);
-    let players = existingCount;
+    // Build ordered player list (sorted by skillRating desc)
+    const allSeed = buildAllPlayers(); // already sorted
+    const count: number | "full" = playerCount && playerCount > 0 ? playerCount : "full";
+    const seedData = slicePlayers(allSeed, count);
 
-    if (existingCount.length < 600) {
-      // Generate and seed 600+ players
-      const seedData = buildAllPlayers();
+    // Always re-seed on start for fresh data with new stats
+    await db.delete(playersTable);
 
-      // Clear existing
-      await db.delete(playersTable);
-
-      // Insert in batches
-      const batchSize = 100;
-      for (let i = 0; i < seedData.length; i += batchSize) {
-        const batch = seedData.slice(i, i + batchSize);
-        await db.insert(playersTable).values(
-          batch.map((p) => ({
-            name: p.name,
-            role: p.role,
-            basePrice: p.basePrice,
-            skillRating: p.skillRating,
-            nationality: p.nationality,
-            sold: false,
-            soldTo: null,
-            soldPrice: null,
-          }))
-        );
-      }
-
-      players = await db.select().from(playersTable);
-    } else {
-      // Reset all players to unsold
-      await db.update(playersTable).set({
-        sold: false,
-        soldTo: null,
-        soldPrice: null,
-      });
-      players = await db.select().from(playersTable);
+    const batchSize = 100;
+    for (let i = 0; i < seedData.length; i += batchSize) {
+      const batch = seedData.slice(i, i + batchSize);
+      await db.insert(playersTable).values(
+        batch.map((p) => ({
+          name: p.name,
+          role: p.role,
+          basePrice: p.basePrice,
+          skillRating: p.skillRating,
+          nationality: p.nationality,
+          sold: false,
+          soldTo: null,
+          soldPrice: null,
+          battingRating: p.battingRating,
+          bowlingRating: p.bowlingRating,
+          fieldingRating: p.fieldingRating,
+          age: p.age,
+          experience: p.experience,
+          form: p.form,
+          strikeRate: p.strikeRate,
+          economy: p.economy,
+          strengths: p.strengths,
+          weaknesses: p.weaknesses,
+        }))
+      );
     }
 
-    // Set up teams with budget
+    const players = await db.select().from(playersTable);
+
+    // Players are already ordered by skillRating from seed, preserve that order
+    const sortedPlayers = [...players].sort((a, b) => b.skillRating - a.skillRating);
+
     const teams = IPL_TEAMS.map((t) => ({
       ...t,
-      budget: t.id === userTeamId ? budget : 100, // other teams get 100 Cr
+      budget: t.id === userTeamId ? budget : 100,
       initialBudget: t.id === userTeamId ? budget : 100,
       players: [],
     }));
 
-    // Set auction state
-    const firstPlayer = players[0] || null;
+    const firstPlayer = sortedPlayers[0] || null;
     setAuctionState({
       started: true,
-      players,
+      players: sortedPlayers,
       playerIndex: 0,
       currentPlayer: firstPlayer,
       currentBid: firstPlayer ? firstPlayer.basePrice : 0,
       currentBidder: null,
-      timer: 15,
+      timer: TIMER_DEFAULT,
       teams,
       soldAnimation: false,
       status: firstPlayer ? "bidding" : "finished",
@@ -104,6 +104,7 @@ router.post("/start", async (req, res) => {
       history: [],
       historyIdCounter: 1,
       timerInterval: null,
+      playerCount: count,
     });
 
     res.json(buildPublicState());
@@ -129,20 +130,14 @@ router.post("/bid", (req, res) => {
     }
 
     const team = state.teams.find((t) => t.id === teamId);
-    if (!team) {
-      return res.status(400).json({ error: "Invalid team" });
-    }
-    if (amount > team.budget) {
-      return res.status(400).json({ error: "Insufficient budget" });
-    }
-    if (team.players.length >= team.maxSquadSize) {
-      return res.status(400).json({ error: "Squad is full" });
-    }
+    if (!team) return res.status(400).json({ error: "Invalid team" });
+    if (amount > team.budget) return res.status(400).json({ error: "Insufficient budget" });
+    if (team.players.length >= team.maxSquadSize) return res.status(400).json({ error: "Squad is full" });
 
     setAuctionState({
       currentBid: parseFloat(amount.toFixed(2)),
       currentBidder: teamId,
-      timer: 15, // reset timer on bid
+      timer: TIMER_ON_BID, // reset to 3s on new bid
     });
 
     res.json(buildPublicState());
@@ -152,7 +147,7 @@ router.post("/bid", (req, res) => {
   }
 });
 
-// POST /api/auction/next - advance to next player
+// POST /api/auction/next — advance to next player
 router.post("/next", async (req, res) => {
   try {
     const state = getAuctionState();
@@ -161,17 +156,14 @@ router.post("/next", async (req, res) => {
       return res.status(400).json({ error: "Auction not started" });
     }
 
-    // Finalize current player if there is one
     if (state.currentPlayer) {
       const sold = state.currentBidder !== null;
 
       if (sold) {
-        // Mark as sold in DB
         await db.update(playersTable)
           .set({ sold: true, soldTo: state.currentBidder, soldPrice: state.currentBid })
           .where((row: any) => row.id === state.currentPlayer!.id);
 
-        // Update team squad and budget
         const updatedTeams = state.teams.map((t) => {
           if (t.id === state.currentBidder) {
             return {
@@ -204,14 +196,12 @@ router.post("/next", async (req, res) => {
           status: "sold",
         });
 
-        // Clear sold animation after 2 seconds
         setTimeout(() => {
           const s = getAuctionState();
           setAuctionState({ soldAnimation: false });
           advanceToNextPlayer(s.playerIndex);
-        }, 2000);
+        }, 2500);
       } else {
-        // Unsold
         const historyEntry: AuctionHistoryEntry = {
           id: state.historyIdCounter,
           playerId: state.currentPlayer.id,
@@ -244,7 +234,7 @@ router.post("/next", async (req, res) => {
   }
 });
 
-// POST /api/auction/pass - mark current player as unsold immediately
+// POST /api/auction/pass — mark current player unsold immediately
 router.post("/pass", (req, res) => {
   try {
     const state = getAuctionState();
@@ -295,7 +285,7 @@ router.get("/history", (req, res) => {
   res.json(state.history);
 });
 
-// POST /api/auction/ai-bid - trigger AI bidding round
+// POST /api/auction/ai-bid — trigger AI bidding round
 router.post("/ai-bid", (req, res) => {
   try {
     const state = getAuctionState();
@@ -306,11 +296,11 @@ router.post("/ai-bid", (req, res) => {
 
     const { newBid, newBidder } = runAiBidRound(state);
 
-    if (newBidder && (newBid > state.currentBid || newBidder !== state.currentBidder)) {
+    if (newBidder && newBid > state.currentBid) {
       setAuctionState({
         currentBid: parseFloat(newBid.toFixed(2)),
         currentBidder: newBidder,
-        timer: Math.min(state.timer + 3, 15), // give a bit more time on AI bid
+        timer: Math.min(state.timer + 2, TIMER_ON_BID), // add 2s on AI bid, cap at 3
       });
     }
 
@@ -320,12 +310,10 @@ router.post("/ai-bid", (req, res) => {
       const newTimer = Math.max(0, currentState.timer - 1);
       setAuctionState({ timer: newTimer });
 
-      // Auto-sell when timer hits 0
       if (newTimer === 0) {
-        // Trigger next player process
         const s = getAuctionState();
         if (s.currentBidder) {
-          // Sold
+          // SOLD
           const soldTeam = s.teams.find((t) => t.id === s.currentBidder);
           const histEntry: AuctionHistoryEntry = {
             id: s.historyIdCounter,
@@ -358,7 +346,6 @@ router.post("/ai-bid", (req, res) => {
             status: "sold",
           });
 
-          // Update in DB async
           db.update(playersTable)
             .set({ sold: true, soldTo: s.currentBidder, soldPrice: s.currentBid })
             .where((row: any) => row.id === s.currentPlayer!.id)
@@ -370,7 +357,7 @@ router.post("/ai-bid", (req, res) => {
             advanceToNextPlayer(curr.playerIndex);
           }, 2500);
         } else {
-          // Unsold
+          // UNSOLD
           const s2 = getAuctionState();
           const histEntry: AuctionHistoryEntry = {
             id: s2.historyIdCounter,
@@ -404,13 +391,11 @@ router.post("/ai-bid", (req, res) => {
   }
 });
 
-// Advance to the next player in the list
 function advanceToNextPlayer(currentIndex: number): void {
   const state = getAuctionState();
   const nextIndex = currentIndex + 1;
 
   if (nextIndex >= state.players.length) {
-    // Auction complete
     setAuctionState({
       status: "finished",
       currentPlayer: null,
@@ -428,7 +413,7 @@ function advanceToNextPlayer(currentIndex: number): void {
     currentPlayer: nextPlayer,
     currentBid: nextPlayer.basePrice,
     currentBidder: null,
-    timer: 15,
+    timer: TIMER_DEFAULT,
     status: "bidding",
     soldAnimation: false,
   });

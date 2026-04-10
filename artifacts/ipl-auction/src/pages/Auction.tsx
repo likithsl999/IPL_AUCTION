@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from "react";
+import React, { useEffect, useRef, useCallback, useState } from "react";
 import { useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -11,30 +11,190 @@ import {
   getGetAuctionStateQueryKey,
   getGetTeamsQueryKey,
   type Team,
+  type Player,
 } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Loader2, Trophy, Users, Wallet, ChevronRight, RotateCcw, SkipForward } from "lucide-react";
+import { Loader2, Trophy, Users, Wallet, ChevronRight, RotateCcw, SkipForward, LayoutGrid } from "lucide-react";
 
-const ROLE_COLORS: Record<string, string> = {
-  Batsman: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-  Bowler: "bg-green-500/20 text-green-400 border-green-500/30",
-  "All-rounder": "bg-purple-500/20 text-purple-400 border-purple-500/30",
-  Wicketkeeper: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+const ROLE_COLORS: Record<string, { bg: string; text: string; border: string; glow: string }> = {
+  Batsman:      { bg: "bg-blue-500/10",   text: "text-blue-300",   border: "border-blue-500/30",   glow: "#3b82f6" },
+  Bowler:       { bg: "bg-green-500/10",  text: "text-green-300",  border: "border-green-500/30",  glow: "#22c55e" },
+  "All-rounder":{ bg: "bg-purple-500/10", text: "text-purple-300", border: "border-purple-500/30", glow: "#a855f7" },
+  Wicketkeeper: { bg: "bg-amber-500/10",  text: "text-amber-300",  border: "border-amber-500/30",  glow: "#f59e0b" },
 };
 
 const BID_INCREMENTS = [0.2, 0.5, 1, 2, 5];
+
+// ─── Stat Bar ────────────────────────────────────────────────────────────────
+function StatBar({ label, value, color = "#3b82f6" }: { label: string; value: number; color?: string }) {
+  return (
+    <div>
+      <div className="flex justify-between text-[10px] mb-1">
+        <span className="text-white/40 uppercase tracking-wider">{label}</span>
+        <span className="font-mono font-bold text-white/80">{value}</span>
+      </div>
+      <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+        <div
+          className="h-full rounded-full transition-all duration-700"
+          style={{ width: `${value}%`, background: `linear-gradient(90deg, ${color}, ${color}99)` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+// ─── Player Card ─────────────────────────────────────────────────────────────
+function PlayerCard({ player, currentBidder, userTeam, teams }: {
+  player: Player;
+  currentBidder: string | null;
+  userTeam?: Team;
+  teams: Team[];
+}) {
+  const rc = ROLE_COLORS[player.role] || ROLE_COLORS.Batsman;
+  const bidTeam = teams.find(t => t.id === currentBidder);
+  const accentColor = bidTeam?.color || userTeam?.color || rc.glow;
+
+  const strengths = player.strengths ? player.strengths.split(",").slice(0, 3) : [];
+  const weaknesses = player.weaknesses ? player.weaknesses.split(",").slice(0, 2) : [];
+
+  return (
+    <div
+      className="relative border rounded-2xl overflow-hidden"
+      style={{
+        borderColor: accentColor + "30",
+        background: `linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0.4) 100%)`,
+        backdropFilter: "blur(10px)",
+        boxShadow: `0 0 30px ${accentColor}15`,
+      }}
+    >
+      {/* Top accent line */}
+      <div
+        className="h-0.5 w-full"
+        style={{ background: `linear-gradient(90deg, ${accentColor}, transparent)` }}
+      />
+
+      <div className="p-5">
+        {/* Header */}
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <h2 className="text-xl font-black uppercase tracking-tight text-white leading-none">
+              {player.name}
+            </h2>
+            <p className="text-xs text-white/40 mt-1">
+              {player.nationality} • Age {player.age} • {player.experience} IPL seasons
+            </p>
+          </div>
+          <span className={`text-xs border px-2.5 py-1 rounded-full font-bold ${rc.bg} ${rc.text} ${rc.border}`}>
+            {player.role}
+          </span>
+        </div>
+
+        {/* Overall rating */}
+        <div className="flex items-center gap-3 mb-4">
+          <div
+            className="w-14 h-14 rounded-xl flex flex-col items-center justify-center font-black flex-shrink-0"
+            style={{
+              background: `linear-gradient(135deg, ${rc.glow}22, ${rc.glow}08)`,
+              border: `1px solid ${rc.glow}30`,
+              boxShadow: `0 0 15px ${rc.glow}20`,
+            }}
+          >
+            <span className="text-xl leading-none font-black text-white">{player.skillRating}</span>
+            <span className="text-[8px] text-white/40 tracking-wider">OVR</span>
+          </div>
+          <div className="flex-1 space-y-1.5">
+            <StatBar label="Batting" value={player.battingRating} color="#3b82f6" />
+            <StatBar label="Bowling" value={player.bowlingRating} color="#22c55e" />
+            <StatBar label="Fielding" value={player.fieldingRating} color="#f59e0b" />
+          </div>
+        </div>
+
+        {/* Stats row */}
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          <div className="text-center p-2 rounded-lg bg-white/3 border border-white/5">
+            <div className="text-xs font-mono font-bold text-white">{player.strikeRate}</div>
+            <div className="text-[9px] text-white/30 uppercase tracking-wider">SR</div>
+          </div>
+          <div className="text-center p-2 rounded-lg bg-white/3 border border-white/5">
+            <div className="text-xs font-mono font-bold text-white">{player.economy?.toFixed(1)}</div>
+            <div className="text-[9px] text-white/30 uppercase tracking-wider">Eco</div>
+          </div>
+          <div className="text-center p-2 rounded-lg bg-white/3 border border-white/5">
+            <div className="text-xs font-mono font-bold text-white">{player.form}</div>
+            <div className="text-[9px] text-white/30 uppercase tracking-wider">Form</div>
+          </div>
+        </div>
+
+        {/* Strengths */}
+        {strengths.length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-2">
+            {strengths.map(s => (
+              <span key={s} className="text-[9px] px-1.5 py-0.5 rounded bg-green-500/10 text-green-400 border border-green-500/20">
+                {s.trim()}
+              </span>
+            ))}
+          </div>
+        )}
+        {weaknesses.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {weaknesses.map(w => (
+              <span key={w} className="text-[9px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20">
+                {w.trim()}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Base price */}
+        <div className="mt-4 pt-3 border-t border-white/5 flex justify-between items-center">
+          <div>
+            <div className="text-[10px] text-white/30 uppercase tracking-wider">Base Price</div>
+            <div className="font-mono font-black text-white">₹{player.basePrice} Cr</div>
+          </div>
+          <div className="text-right">
+            <div className="text-[10px] text-white/30 uppercase tracking-wider">Form</div>
+            <div className={`font-mono font-bold ${player.form >= 80 ? "text-green-400" : player.form >= 60 ? "text-yellow-400" : "text-red-400"}`}>
+              {player.form >= 80 ? "🔥 Hot" : player.form >= 60 ? "⚡ OK" : "❄️ Cold"}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Countdown Phase Label ────────────────────────────────────────────────────
+function PhaseLabel({ timer, hasBidder }: { timer: number; hasBidder: boolean }) {
+  if (!hasBidder) return null;
+  if (timer === 2) return (
+    <div className="text-yellow-400 font-black text-lg uppercase tracking-widest animate-pulse">
+      GOING ONCE...
+    </div>
+  );
+  if (timer === 1) return (
+    <div className="text-orange-400 font-black text-lg uppercase tracking-widest animate-pulse">
+      GOING TWICE...
+    </div>
+  );
+  if (timer === 0) return (
+    <div className="text-red-400 font-black text-xl uppercase tracking-widest animate-bounce">
+      SOLD!
+    </div>
+  );
+  return null;
+}
 
 export default function Auction() {
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const aiIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [showTeams, setShowTeams] = useState(false);
 
   const { data: state, isLoading } = useGetAuctionState({
     query: {
       queryKey: getGetAuctionStateQueryKey(),
-      refetchInterval: 2000,
+      refetchInterval: 800, // faster polling for snappier timer feel
     },
   });
 
@@ -49,13 +209,13 @@ export default function Auction() {
     queryClient.invalidateQueries({ queryKey: getGetTeamsQueryKey() });
   }, [queryClient]);
 
-  // Trigger AI bids every 3 seconds during bidding
+  // Trigger AI bids every 1.2 seconds during bidding (fast auction)
   useEffect(() => {
     if (state?.status === "bidding" && state?.started) {
       if (aiIntervalRef.current) clearInterval(aiIntervalRef.current);
       aiIntervalRef.current = setInterval(() => {
         triggerAiBid.mutate(undefined, { onSettled: invalidate });
-      }, 3000);
+      }, 1200);
     } else {
       if (aiIntervalRef.current) {
         clearInterval(aiIntervalRef.current);
@@ -76,76 +236,76 @@ export default function Auction() {
     );
   };
 
-  const handleNext = () => {
-    nextPlayer.mutate(undefined, { onSettled: invalidate });
-  };
-
-  const handlePass = () => {
-    passPlayer.mutate(undefined, { onSettled: invalidate });
-  };
-
+  const handleNext = () => nextPlayer.mutate(undefined, { onSettled: invalidate });
+  const handlePass = () => passPlayer.mutate(undefined, { onSettled: invalidate });
   const handleReset = () => {
     resetAuction.mutate(undefined, {
-      onSuccess: () => {
-        invalidate();
-        setLocation("/");
-      }
+      onSuccess: () => { invalidate(); setLocation("/"); }
     });
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <Loader2 className="h-10 w-10 animate-spin text-yellow-400" />
       </div>
     );
   }
 
   if (!state?.started) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4">
-        <p className="text-muted-foreground">No auction in progress.</p>
-        <Button onClick={() => setLocation("/")}>Go to Setup</Button>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-black gap-4">
+        <p className="text-white/50">No auction in progress.</p>
+        <Button onClick={() => setLocation("/")} className="bg-yellow-400 text-black font-bold">
+          Go to Setup
+        </Button>
       </div>
     );
   }
 
-  // SOLD / UNSOLD animation overlay
   const showSoldOverlay = state.soldAnimation && state.status === "sold";
   const soldTeam = state.teams?.find((t: Team) => t.id === state.currentBidder);
-
   const userTeam = state.teams?.find((t: Team) => t.id === state.userTeamId);
   const progress = state.totalPlayers > 0 ? (state.playerIndex / state.totalPlayers) * 100 : 0;
   const isFinished = state.status === "finished";
   const isBidding = state.status === "bidding";
   const isUserBidder = state.currentBidder === state.userTeamId;
-
   const userBudget = userTeam?.budget ?? 0;
   const canBid = isBidding && userBudget > (state.currentBid || 0) + 0.1 && (userTeam?.players?.length ?? 0) < 25;
+  const timer = state.timer ?? 0;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
+    <div className="min-h-screen bg-black text-white flex flex-col relative overflow-hidden">
       {/* SOLD ANIMATION OVERLAY */}
       {showSoldOverlay && soldTeam && (
         <div
           className="fixed inset-0 z-50 flex flex-col items-center justify-center"
-          style={{ backgroundColor: soldTeam.color + "22", backdropFilter: "blur(4px)" }}
+          style={{
+            backgroundColor: soldTeam.color + "15",
+            backdropFilter: "blur(8px)",
+          }}
         >
           <div
-            className="text-[120px] md:text-[180px] font-black uppercase tracking-tighter leading-none animate-bounce"
-            style={{ color: soldTeam.color, textShadow: `0 0 60px ${soldTeam.color}88` }}
+            className="text-[90px] md:text-[140px] font-black uppercase tracking-tighter leading-none"
+            style={{
+              color: soldTeam.color,
+              textShadow: `0 0 80px ${soldTeam.color}`,
+              animation: "soldPulse 0.3s ease-out",
+            }}
           >
             SOLD!
           </div>
-          <div className="text-2xl md:text-4xl font-bold text-white mt-4">{state.currentPlayer?.name}</div>
-          <div className="mt-2 flex items-center gap-3">
+          <div className="text-3xl md:text-5xl font-black text-white mt-2">
+            {state.currentPlayer?.name}
+          </div>
+          <div className="mt-4 flex items-center gap-3">
             <div
-              className="px-4 py-2 rounded-full font-black text-lg text-white"
-              style={{ backgroundColor: soldTeam.color }}
+              className="px-5 py-2 rounded-full font-black text-white text-lg"
+              style={{ backgroundColor: soldTeam.color, boxShadow: `0 0 20px ${soldTeam.color}` }}
             >
               {soldTeam.shortName}
             </div>
-            <span className="text-3xl font-mono font-bold text-white">
+            <span className="text-4xl font-mono font-black text-white">
               ₹{state.currentBid?.toFixed(2)} Cr
             </span>
           </div>
@@ -154,44 +314,63 @@ export default function Auction() {
 
       {/* FINISHED STATE */}
       {isFinished && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background/95 backdrop-blur-sm gap-6">
-          <Trophy className="h-20 w-20 text-yellow-400" />
-          <h2 className="text-4xl font-black uppercase tracking-tighter">Auction Complete</h2>
-          <div className="flex flex-col items-center gap-2 text-muted-foreground">
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 backdrop-blur-sm gap-6">
+          <Trophy className="h-20 w-20 text-yellow-400" style={{ filter: "drop-shadow(0 0 20px rgba(251,191,36,0.6))" }} />
+          <h2 className="text-5xl font-black uppercase tracking-tighter bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+            Auction Complete
+          </h2>
+          <div className="flex flex-col items-center gap-2 text-white/50">
             <p>{state.playerIndex} players processed</p>
             {userTeam && (
-              <p className="text-lg font-bold text-foreground">
+              <p className="text-xl font-bold text-white">
                 {userTeam.name} — {userTeam.players.length} players — ₹{userTeam.budget.toFixed(2)} Cr remaining
               </p>
             )}
           </div>
           <div className="flex gap-3">
-            <Button onClick={() => setLocation("/squad")} variant="default">View My Squad</Button>
-            <Button onClick={() => setLocation("/history")} variant="outline">Auction History</Button>
-            <Button onClick={handleReset} variant="ghost" className="text-destructive">Reset</Button>
+            <Button onClick={() => setLocation("/squad")} className="bg-yellow-400 text-black font-bold">
+              View My Squad
+            </Button>
+            <Button onClick={() => setLocation("/teams")} variant="outline" className="border-white/10 text-white">
+              All Teams
+            </Button>
+            <Button onClick={() => setLocation("/history")} variant="outline" className="border-white/10 text-white">
+              History
+            </Button>
+            <Button onClick={handleReset} variant="ghost" className="text-red-400">
+              Reset
+            </Button>
           </div>
         </div>
       )}
 
       {/* TOP BAR */}
-      <div className="border-b border-border px-4 py-2 flex items-center justify-between bg-card/50 backdrop-blur-sm sticky top-0 z-10">
+      <div className="border-b border-white/5 px-4 py-2 flex items-center justify-between bg-black/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="flex items-center gap-4">
-          <span className="text-xs uppercase tracking-widest font-bold text-muted-foreground">IPL AUCTION</span>
+          <span className="text-xs font-black text-white/30 uppercase tracking-widest">IPL AUCTION</span>
           <div className="flex items-center gap-2">
-            <Progress value={progress} className="w-32 h-1" />
-            <span className="text-xs text-muted-foreground font-mono">
+            <div className="w-32 h-1 bg-white/5 rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-yellow-400 to-orange-500"
+                style={{ width: `${progress}%`, transition: "width 0.5s ease" }}
+              />
+            </div>
+            <span className="text-xs text-white/30 font-mono">
               {state.playerIndex + 1}/{state.totalPlayers}
             </span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" className="text-xs" onClick={() => setLocation("/squad")}>
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="sm" className="text-xs text-white/40 hover:text-white" onClick={() => setLocation("/squad")}>
             <Users className="h-3 w-3 mr-1" /> My Squad
           </Button>
-          <Button variant="ghost" size="sm" className="text-xs" onClick={() => setLocation("/history")}>
+          <Button variant="ghost" size="sm" className="text-xs text-white/40 hover:text-white" onClick={() => setLocation("/teams")}>
+            <LayoutGrid className="h-3 w-3 mr-1" /> All Teams
+          </Button>
+          <Button variant="ghost" size="sm" className="text-xs text-white/40 hover:text-white" onClick={() => setLocation("/history")}>
             History
           </Button>
-          <Button variant="ghost" size="sm" className="text-xs text-destructive hover:text-destructive" onClick={handleReset}>
+          <Button variant="ghost" size="sm" className="text-xs text-red-400/60 hover:text-red-400" onClick={handleReset}>
             <RotateCcw className="h-3 w-3 mr-1" /> Reset
           </Button>
         </div>
@@ -199,113 +378,75 @@ export default function Auction() {
 
       <div className="flex flex-1 overflow-hidden">
         {/* MAIN CONTENT */}
-        <div className="flex-1 flex flex-col items-center justify-center p-4 md:p-8 gap-6">
+        <div className="flex-1 flex flex-col items-center justify-center p-4 md:p-6 gap-5 overflow-y-auto">
           {state.currentPlayer ? (
             <>
-              {/* PLAYER CARD */}
-              <div className="w-full max-w-sm">
-                <div className="relative border border-border rounded-xl bg-card overflow-hidden shadow-2xl">
-                  {/* Color accent bar */}
-                  <div
-                    className="h-1 w-full"
-                    style={{
-                      background: isUserBidder && userTeam
-                        ? `linear-gradient(90deg, ${userTeam.color}, transparent)`
-                        : soldTeam
-                        ? `linear-gradient(90deg, ${soldTeam.color}, transparent)`
-                        : "transparent"
-                    }}
-                  />
-                  <div className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div>
-                        <h2 className="text-2xl font-black uppercase tracking-tight">{state.currentPlayer.name}</h2>
-                        <p className="text-sm text-muted-foreground mt-0.5">{state.currentPlayer.nationality}</p>
-                      </div>
-                      <span className={`text-xs border px-2 py-1 rounded-full font-medium ${ROLE_COLORS[state.currentPlayer.role] || ""}`}>
-                        {state.currentPlayer.role}
+              {/* Player Card */}
+              <div className="w-full max-w-md">
+                <PlayerCard
+                  player={state.currentPlayer as Player}
+                  currentBidder={state.currentBidder ?? null}
+                  userTeam={userTeam}
+                  teams={state.teams as Team[]}
+                />
+              </div>
+
+              {/* Current Bid + Timer */}
+              <div className="text-center space-y-3">
+                {/* Bid amount */}
+                <div>
+                  <div className="text-[10px] uppercase tracking-widest text-white/30 mb-1">Current Bid</div>
+                  <div className="text-5xl md:text-6xl font-black font-mono tracking-tighter text-white">
+                    ₹{state.currentBid?.toFixed(2)}
+                    <span className="text-2xl text-white/30 ml-1">Cr</span>
+                  </div>
+                  {state.currentBidder && (
+                    <div className="mt-2 flex items-center justify-center gap-2">
+                      <span className="text-xs text-white/30">Leading:</span>
+                      <span
+                        className="text-sm font-black px-3 py-0.5 rounded-full"
+                        style={{
+                          backgroundColor: (state.teams?.find((t: Team) => t.id === state.currentBidder)?.color ?? "#666") + "25",
+                          color: state.teams?.find((t: Team) => t.id === state.currentBidder)?.color ?? "#fff",
+                          boxShadow: `0 0 10px ${(state.teams?.find((t: Team) => t.id === state.currentBidder)?.color ?? "#666")}30`,
+                        }}
+                      >
+                        {state.currentBidder}
                       </span>
+                      {isUserBidder && (
+                        <span className="text-xs font-bold text-green-400 animate-pulse">(YOU)</span>
+                      )}
                     </div>
-
-                    {/* Skill rating */}
-                    <div className="mb-4">
-                      <div className="flex justify-between text-xs mb-1.5 text-muted-foreground">
-                        <span>SKILL RATING</span>
-                        <span className="font-mono font-bold text-foreground">{state.currentPlayer.skillRating}/100</span>
-                      </div>
-                      <div className="h-2 bg-muted rounded-full overflow-hidden">
-                        <div
-                          className="h-full rounded-full transition-all duration-500"
-                          style={{
-                            width: `${state.currentPlayer.skillRating}%`,
-                            background: `linear-gradient(90deg, #3b82f6, #8b5cf6)`
-                          }}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex justify-between items-center pt-3 border-t border-border">
-                      <div>
-                        <div className="text-xs text-muted-foreground uppercase tracking-wider">Base Price</div>
-                        <div className="font-mono font-bold">₹{state.currentPlayer.basePrice} Cr</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-xs text-muted-foreground uppercase tracking-wider">Player #</div>
-                        <div className="font-mono text-muted-foreground">{state.playerIndex + 1}</div>
-                      </div>
-                    </div>
-                  </div>
+                  )}
                 </div>
-              </div>
 
-              {/* CURRENT BID */}
-              <div className="text-center">
-                <div className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Current Bid</div>
-                <div className="text-5xl md:text-6xl font-black font-mono tracking-tighter text-foreground">
-                  ₹{state.currentBid?.toFixed(2)}
-                  <span className="text-2xl text-muted-foreground ml-1">Cr</span>
-                </div>
-                {state.currentBidder && (
-                  <div className="mt-2 flex items-center justify-center gap-2">
-                    <span className="text-xs text-muted-foreground">Leading bid by</span>
-                    <span
-                      className="text-sm font-bold px-3 py-0.5 rounded-full"
-                      style={{
-                        backgroundColor: (state.teams?.find((t: Team) => t.id === state.currentBidder)?.color ?? "#666") + "33",
-                        color: state.teams?.find((t: Team) => t.id === state.currentBidder)?.color ?? "#fff",
-                      }}
-                    >
-                      {state.currentBidder}
-                    </span>
-                    {isUserBidder && <span className="text-xs text-green-400">(YOU)</span>}
-                  </div>
-                )}
-              </div>
-
-              {/* TIMER */}
-              <div className="flex flex-col items-center gap-2">
-                <div
-                  className={`text-4xl font-mono font-black transition-colors ${
-                    (state.timer ?? 0) <= 5 ? "text-red-400 animate-pulse" : "text-foreground"
-                  }`}
-                >
-                  {String(state.timer ?? 0).padStart(2, "0")}s
-                </div>
-                <div className="w-48 h-1 bg-muted rounded-full overflow-hidden">
+                {/* Timer */}
+                <div className="flex flex-col items-center gap-1.5">
+                  <PhaseLabel timer={timer} hasBidder={!!state.currentBidder} />
                   <div
-                    className={`h-full rounded-full transition-all duration-1000 ${
-                      (state.timer ?? 0) <= 5 ? "bg-red-500" : "bg-primary"
+                    className={`text-3xl font-mono font-black transition-colors ${
+                      timer <= 2 ? "text-red-400" : timer <= 3 ? "text-orange-400" : "text-white"
                     }`}
-                    style={{ width: `${((state.timer ?? 0) / 15) * 100}%` }}
-                  />
+                  >
+                    {String(timer).padStart(2, "0")}s
+                  </div>
+                  <div className="w-40 h-1 bg-white/5 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        timer <= 2 ? "bg-red-500" : timer <= 3 ? "bg-orange-500" : "bg-yellow-400"
+                      }`}
+                      style={{ width: `${(timer / 5) * 100}%` }}
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* BID CONTROLS */}
+              {/* Bid Controls */}
               {isBidding && (
                 <div className="w-full max-w-sm space-y-3">
-                  <div className="text-xs uppercase tracking-widest text-muted-foreground text-center">
-                    Your Budget: <span className="text-foreground font-mono font-bold">₹{userBudget.toFixed(2)} Cr</span>
+                  <div className="text-center text-xs text-white/30">
+                    Your Budget:{" "}
+                    <span className="text-white font-mono font-bold">₹{userBudget.toFixed(2)} Cr</span>
                   </div>
                   <div className="grid grid-cols-5 gap-2">
                     {BID_INCREMENTS.map((inc) => {
@@ -316,10 +457,10 @@ export default function Auction() {
                           key={inc}
                           onClick={() => handleBid(inc)}
                           disabled={!canBid || !canAfford || placeBid.isPending}
-                          className={`py-2.5 rounded-lg text-xs font-bold font-mono border transition-all ${
+                          className={`py-3 rounded-xl text-xs font-black border transition-all active:scale-95 ${
                             canBid && canAfford
-                              ? "border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground active:scale-95"
-                              : "border-border text-muted-foreground opacity-40 cursor-not-allowed"
+                              ? "border-yellow-500/30 text-yellow-400 bg-yellow-500/5 hover:bg-yellow-500/15 hover:border-yellow-500/50"
+                              : "border-white/5 text-white/20 cursor-not-allowed"
                           }`}
                         >
                           +{inc}
@@ -327,13 +468,12 @@ export default function Auction() {
                       );
                     })}
                   </div>
-
                   <div className="flex gap-2">
                     <Button
                       onClick={handlePass}
                       variant="outline"
                       size="sm"
-                      className="flex-1 text-xs"
+                      className="flex-1 text-xs border-white/10 text-white/50 hover:text-white hover:border-white/20"
                       disabled={passPlayer.isPending}
                     >
                       <SkipForward className="h-3 w-3 mr-1" /> Pass
@@ -342,7 +482,7 @@ export default function Auction() {
                       onClick={handleNext}
                       variant="outline"
                       size="sm"
-                      className="flex-1 text-xs"
+                      className="flex-1 text-xs border-white/10 text-white/50 hover:text-white hover:border-white/20"
                       disabled={nextPlayer.isPending}
                     >
                       <ChevronRight className="h-3 w-3 mr-1" />
@@ -354,60 +494,59 @@ export default function Auction() {
             </>
           ) : (
             <div className="text-center space-y-4">
-              <Loader2 className="h-10 w-10 animate-spin text-muted-foreground mx-auto" />
-              <p className="text-muted-foreground text-sm">Preparing next player...</p>
+              <Loader2 className="h-10 w-10 animate-spin text-white/20 mx-auto" />
+              <p className="text-white/30 text-sm">Preparing next player...</p>
             </div>
           )}
         </div>
 
         {/* SIDEBAR — Teams */}
-        <div className="hidden md:flex w-64 border-l border-border flex-col bg-card/30">
-          <div className="p-3 border-b border-border">
-            <span className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Teams</span>
+        <div className="hidden md:flex w-60 border-l border-white/5 flex-col bg-black/40">
+          <div className="p-3 border-b border-white/5">
+            <span className="text-[10px] uppercase tracking-widest font-bold text-white/30">Teams</span>
           </div>
           <div className="flex-1 overflow-y-auto">
             {state.teams?.map((team: Team) => {
               const isUser = team.id === state.userTeamId;
               const isCurrent = team.id === state.currentBidder;
+              const budgetPct = (team.budget / team.initialBudget) * 100;
               return (
                 <div
                   key={team.id}
-                  className={`px-3 py-2.5 border-b border-border/50 transition-colors ${
-                    isCurrent ? "bg-white/5" : ""
-                  } ${isUser ? "border-l-2" : ""}`}
-                  style={isUser ? { borderLeftColor: team.color } : {}}
+                  className={`px-3 py-2.5 border-b border-white/3 transition-all ${isCurrent ? "bg-white/3" : ""}`}
+                  style={isUser ? { borderLeft: `2px solid ${team.color}` } : { borderLeft: "2px solid transparent" }}
                 >
                   <div className="flex items-center gap-2">
                     <div
                       className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-black text-white flex-shrink-0"
-                      style={{ backgroundColor: team.color }}
+                      style={{ backgroundColor: team.color, boxShadow: isCurrent ? `0 0 8px ${team.color}` : "none" }}
                     >
                       {team.shortName.slice(0, 2)}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold truncate">
+                        <span className="text-xs font-bold text-white/70 truncate">
                           {team.shortName}
-                          {isUser && <span className="ml-1 text-[10px] text-muted-foreground">(YOU)</span>}
-                          {isCurrent && <span className="ml-1 text-[10px]" style={{ color: team.color }}>BIDDING</span>}
+                          {isUser && <span className="ml-1 text-[9px] text-white/30">(YOU)</span>}
                         </span>
+                        {isCurrent && (
+                          <span className="text-[9px] font-black" style={{ color: team.color }}>
+                            BID
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center justify-between mt-0.5">
-                        <span className="text-[10px] text-muted-foreground font-mono">₹{team.budget.toFixed(1)} Cr</span>
-                        <span className="text-[10px] text-muted-foreground font-mono flex items-center gap-0.5">
-                          <Users className="h-2.5 w-2.5" />{team.players.length}
+                        <span className="text-[10px] text-white/30 font-mono">₹{team.budget.toFixed(1)}</span>
+                        <span className="text-[10px] text-white/30 font-mono">
+                          {team.players.length}/25
                         </span>
                       </div>
                     </div>
                   </div>
-                  {/* Budget bar */}
-                  <div className="mt-1.5 h-0.5 bg-muted rounded-full overflow-hidden">
+                  <div className="mt-1.5 h-0.5 bg-white/5 rounded-full overflow-hidden">
                     <div
-                      className="h-full rounded-full"
-                      style={{
-                        width: `${(team.budget / team.initialBudget) * 100}%`,
-                        backgroundColor: team.color,
-                      }}
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{ width: `${budgetPct}%`, backgroundColor: team.color }}
                     />
                   </div>
                 </div>
@@ -415,29 +554,42 @@ export default function Auction() {
             })}
           </div>
 
-          {/* User team summary */}
+          {/* User summary */}
           {userTeam && (
-            <div className="p-3 border-t border-border bg-card/50">
-              <div className="text-xs uppercase tracking-widest font-bold mb-2" style={{ color: userTeam.color }}>
+            <div className="p-3 border-t border-white/5">
+              <div className="text-[10px] font-black uppercase tracking-wider mb-2" style={{ color: userTeam.color }}>
                 {userTeam.shortName}
               </div>
-              <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="grid grid-cols-2 gap-2 text-xs mb-2">
                 <div>
-                  <div className="text-muted-foreground">Budget Left</div>
-                  <div className="font-mono font-bold">₹{userTeam.budget.toFixed(2)} Cr</div>
+                  <div className="text-white/30">Budget</div>
+                  <div className="font-mono font-bold text-white">₹{userTeam.budget.toFixed(2)}</div>
                 </div>
                 <div>
-                  <div className="text-muted-foreground">Players</div>
-                  <div className="font-mono font-bold">{userTeam.players.length}/25</div>
+                  <div className="text-white/30">Players</div>
+                  <div className="font-mono font-bold text-white">{userTeam.players.length}/25</div>
                 </div>
               </div>
-              <Button size="sm" variant="ghost" className="w-full mt-2 text-xs" onClick={() => setLocation("/squad")}>
-                View Squad
+              <Button
+                size="sm"
+                variant="ghost"
+                className="w-full text-xs text-white/40 hover:text-white border border-white/5"
+                onClick={() => setLocation("/squad")}
+              >
+                <Wallet className="h-3 w-3 mr-1" /> View Squad
               </Button>
             </div>
           )}
         </div>
       </div>
+
+      <style>{`
+        @keyframes soldPulse {
+          0% { transform: scale(0.8); opacity: 0; }
+          50% { transform: scale(1.05); }
+          100% { transform: scale(1); opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 }

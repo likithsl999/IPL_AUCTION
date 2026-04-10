@@ -7,6 +7,7 @@ import Home from "@/pages/Home";
 import Auction from "@/pages/Auction";
 import Squad from "@/pages/Squad";
 import History from "@/pages/History";
+import Teams from "@/pages/Teams";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,6 +25,7 @@ function Router() {
       <Route path="/auction" component={Auction} />
       <Route path="/squad" component={Squad} />
       <Route path="/history" component={History} />
+      <Route path="/teams" component={Teams} />
       <Route component={NotFound} />
     </Switch>
   );

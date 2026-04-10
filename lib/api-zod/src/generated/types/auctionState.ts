@@ -24,4 +24,5 @@ export interface AuctionState {
   userTeamId?: string | null;
   playerIndex: number;
   totalPlayers: number;
+  playerCount?: string;
 }

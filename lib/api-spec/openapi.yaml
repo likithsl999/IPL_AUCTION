@@ -275,6 +275,35 @@ components:
         soldPrice:
           type: number
           nullable: true
+        battingRating:
+          type: integer
+          minimum: 1
+          maximum: 100
+        bowlingRating:
+          type: integer
+          minimum: 1
+          maximum: 100
+        fieldingRating:
+          type: integer
+          minimum: 1
+          maximum: 100
+        age:
+          type: integer
+        experience:
+          type: integer
+          description: IPL seasons
+        form:
+          type: integer
+          minimum: 1
+          maximum: 100
+        strikeRate:
+          type: number
+        economy:
+          type: number
+        strengths:
+          type: string
+        weaknesses:
+          type: string
       required:
         - id
         - name
@@ -283,6 +312,16 @@ components:
         - skillRating
         - nationality
         - sold
+        - battingRating
+        - bowlingRating
+        - fieldingRating
+        - age
+        - experience
+        - form
+        - strikeRate
+        - economy
+        - strengths
+        - weaknesses
 
     Team:
       type: object
@@ -343,7 +382,7 @@ components:
           enum: [idle, bidding, sold, unsold, finished]
         difficulty:
           type: string
-          enum: [easy, medium, hard]
+          enum: [easy, medium, hard, extreme]
         userTeamId:
           type: string
           nullable: true
@@ -351,6 +390,8 @@ components:
           type: integer
         totalPlayers:
           type: integer
+        playerCount:
+          type: string
       required:
         - started
         - currentBid
@@ -371,7 +412,10 @@ components:
           type: number
         difficulty:
           type: string
-          enum: [easy, medium, hard]
+          enum: [easy, medium, hard, extreme]
+        playerCount:
+          type: integer
+          description: Number of players to include (0 means full pool)
       required:
         - userTeamId
         - budget

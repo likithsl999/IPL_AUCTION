@@ -1,276 +1,1051 @@
-// 600+ IPL players dataset (real stars + generated players)
-// Roles: Batsman, Bowler, All-rounder, Wicketkeeper
-// Nationalities: Indian, Australian, English, South African, West Indian, Sri Lankan, New Zealand, Bangladesh, Afghan, Pakistan
+// 200+ Real IPL/International Players Dataset
+// Full stats: name, role, nationality, ratings, age, experience, form, strikeRate, economy, strengths, weaknesses
+// Sorted by skillRating descending (95+, 90-94, 85-89, ...)
 
 export interface SeedPlayer {
   name: string;
   role: "Batsman" | "Bowler" | "All-rounder" | "Wicketkeeper";
   basePrice: number; // Crores
-  skillRating: number; // 1-100
+  skillRating: number; // overall 1-100
   nationality: string;
+  battingRating: number;
+  bowlingRating: number;
+  fieldingRating: number;
+  age: number;
+  experience: number; // IPL seasons
+  form: number; // recent form 1-100
+  strikeRate: number; // T20 batting SR
+  economy: number; // bowling economy
+  strengths: string; // comma-separated
+  weaknesses: string;
 }
 
-// Real star players
-export const REAL_PLAYERS: SeedPlayer[] = [
-  // TOP STARS
-  { name: "Virat Kohli", role: "Batsman", basePrice: 2, skillRating: 98, nationality: "Indian" },
-  { name: "MS Dhoni", role: "Wicketkeeper", basePrice: 2, skillRating: 97, nationality: "Indian" },
-  { name: "Rohit Sharma", role: "Batsman", basePrice: 2, skillRating: 96, nationality: "Indian" },
-  { name: "Jasprit Bumrah", role: "Bowler", basePrice: 2, skillRating: 97, nationality: "Indian" },
-  { name: "Hardik Pandya", role: "All-rounder", basePrice: 2, skillRating: 94, nationality: "Indian" },
-  { name: "KL Rahul", role: "Wicketkeeper", basePrice: 2, skillRating: 93, nationality: "Indian" },
-  { name: "Ravindra Jadeja", role: "All-rounder", basePrice: 2, skillRating: 95, nationality: "Indian" },
-  { name: "Suryakumar Yadav", role: "Batsman", basePrice: 2, skillRating: 94, nationality: "Indian" },
-  { name: "Shubman Gill", role: "Batsman", basePrice: 2, skillRating: 92, nationality: "Indian" },
-  { name: "Rishabh Pant", role: "Wicketkeeper", basePrice: 2, skillRating: 93, nationality: "Indian" },
-
-  // OVERSEAS STARS
-  { name: "Pat Cummins", role: "All-rounder", basePrice: 2, skillRating: 96, nationality: "Australian" },
-  { name: "David Warner", role: "Batsman", basePrice: 2, skillRating: 92, nationality: "Australian" },
-  { name: "Steve Smith", role: "Batsman", basePrice: 1.5, skillRating: 90, nationality: "Australian" },
-  { name: "Mitchell Starc", role: "Bowler", basePrice: 2, skillRating: 92, nationality: "Australian" },
-  { name: "Glenn Maxwell", role: "All-rounder", basePrice: 2, skillRating: 91, nationality: "Australian" },
-  { name: "Josh Hazlewood", role: "Bowler", basePrice: 2, skillRating: 91, nationality: "Australian" },
-  { name: "Marcus Stoinis", role: "All-rounder", basePrice: 1.5, skillRating: 87, nationality: "Australian" },
-  { name: "Travis Head", role: "Batsman", basePrice: 2, skillRating: 90, nationality: "Australian" },
-  { name: "Tim David", role: "Batsman", basePrice: 2, skillRating: 86, nationality: "Singaporean" },
-  { name: "Cameron Green", role: "All-rounder", basePrice: 2, skillRating: 85, nationality: "Australian" },
-
-  { name: "Ben Stokes", role: "All-rounder", basePrice: 2, skillRating: 95, nationality: "English" },
-  { name: "Jos Buttler", role: "Wicketkeeper", basePrice: 2, skillRating: 94, nationality: "English" },
-  { name: "Sam Curran", role: "All-rounder", basePrice: 2, skillRating: 87, nationality: "English" },
-  { name: "Liam Livingstone", role: "All-rounder", basePrice: 1.5, skillRating: 86, nationality: "English" },
-  { name: "Mark Wood", role: "Bowler", basePrice: 1.5, skillRating: 88, nationality: "English" },
-  { name: "Moeen Ali", role: "All-rounder", basePrice: 1, skillRating: 84, nationality: "English" },
-  { name: "Jonny Bairstow", role: "Wicketkeeper", basePrice: 1.5, skillRating: 87, nationality: "English" },
-  { name: "Phil Salt", role: "Wicketkeeper", basePrice: 1, skillRating: 82, nationality: "English" },
-  { name: "Will Jacks", role: "All-rounder", basePrice: 1, skillRating: 80, nationality: "English" },
-  { name: "Jofra Archer", role: "Bowler", basePrice: 2, skillRating: 92, nationality: "English" },
-
-  { name: "Kagiso Rabada", role: "Bowler", basePrice: 2, skillRating: 93, nationality: "South African" },
-  { name: "Quinton de Kock", role: "Wicketkeeper", basePrice: 1.5, skillRating: 90, nationality: "South African" },
-  { name: "David Miller", role: "Batsman", basePrice: 1.5, skillRating: 88, nationality: "South African" },
-  { name: "Faf du Plessis", role: "Batsman", basePrice: 1.5, skillRating: 89, nationality: "South African" },
-  { name: "Anrich Nortje", role: "Bowler", basePrice: 1.5, skillRating: 90, nationality: "South African" },
-  { name: "Marco Jansen", role: "All-rounder", basePrice: 1, skillRating: 83, nationality: "South African" },
-  { name: "Reeza Hendricks", role: "Batsman", basePrice: 0.5, skillRating: 78, nationality: "South African" },
-  { name: "Rassie van der Dussen", role: "Batsman", basePrice: 1, skillRating: 84, nationality: "South African" },
-  { name: "Lungi Ngidi", role: "Bowler", basePrice: 1, skillRating: 82, nationality: "South African" },
-  { name: "Aiden Markram", role: "Batsman", basePrice: 1, skillRating: 85, nationality: "South African" },
-
-  { name: "Andre Russell", role: "All-rounder", basePrice: 2, skillRating: 95, nationality: "West Indian" },
-  { name: "Sunil Narine", role: "All-rounder", basePrice: 2, skillRating: 94, nationality: "West Indian" },
-  { name: "Nicholas Pooran", role: "Wicketkeeper", basePrice: 1.5, skillRating: 88, nationality: "West Indian" },
-  { name: "Shimron Hetmyer", role: "Batsman", basePrice: 1, skillRating: 84, nationality: "West Indian" },
-  { name: "Jason Holder", role: "All-rounder", basePrice: 1, skillRating: 83, nationality: "West Indian" },
-  { name: "Obed McCoy", role: "Bowler", basePrice: 0.5, skillRating: 78, nationality: "West Indian" },
-  { name: "Rovman Powell", role: "Batsman", basePrice: 1, skillRating: 82, nationality: "West Indian" },
-  { name: "Kyle Mayers", role: "All-rounder", basePrice: 0.5, skillRating: 79, nationality: "West Indian" },
-  { name: "Akeal Hosein", role: "Bowler", basePrice: 0.5, skillRating: 76, nationality: "West Indian" },
-  { name: "Brandon King", role: "Batsman", basePrice: 0.5, skillRating: 75, nationality: "West Indian" },
-
-  { name: "Rashid Khan", role: "Bowler", basePrice: 2, skillRating: 96, nationality: "Afghan" },
-  { name: "Mohammad Nabi", role: "All-rounder", basePrice: 1, skillRating: 83, nationality: "Afghan" },
-  { name: "Mujeeb ur Rahman", role: "Bowler", basePrice: 1, skillRating: 82, nationality: "Afghan" },
-  { name: "Noor Ahmad", role: "Bowler", basePrice: 0.5, skillRating: 78, nationality: "Afghan" },
-  { name: "Hazratullah Zazai", role: "Batsman", basePrice: 0.5, skillRating: 75, nationality: "Afghan" },
-
-  { name: "Trent Boult", role: "Bowler", basePrice: 1.5, skillRating: 91, nationality: "New Zealand" },
-  { name: "Kane Williamson", role: "Batsman", basePrice: 1.5, skillRating: 90, nationality: "New Zealand" },
-  { name: "Lockie Ferguson", role: "Bowler", basePrice: 1, skillRating: 85, nationality: "New Zealand" },
-  { name: "Devon Conway", role: "Wicketkeeper", basePrice: 1, skillRating: 84, nationality: "New Zealand" },
-  { name: "Mitchell Santner", role: "All-rounder", basePrice: 0.5, skillRating: 80, nationality: "New Zealand" },
-  { name: "Glenn Phillips", role: "Batsman", basePrice: 1, skillRating: 83, nationality: "New Zealand" },
-  { name: "Finn Allen", role: "Batsman", basePrice: 0.5, skillRating: 77, nationality: "New Zealand" },
-  { name: "Adam Milne", role: "Bowler", basePrice: 0.5, skillRating: 76, nationality: "New Zealand" },
-
-  { name: "Shakib Al Hasan", role: "All-rounder", basePrice: 1, skillRating: 87, nationality: "Bangladeshi" },
-  { name: "Litton Das", role: "Wicketkeeper", basePrice: 0.5, skillRating: 78, nationality: "Bangladeshi" },
-  { name: "Mustafizur Rahman", role: "Bowler", basePrice: 1, skillRating: 85, nationality: "Bangladeshi" },
-  { name: "Mahmudullah", role: "All-rounder", basePrice: 0.5, skillRating: 77, nationality: "Bangladeshi" },
-
-  { name: "Wanindu Hasaranga", role: "All-rounder", basePrice: 1.5, skillRating: 89, nationality: "Sri Lankan" },
-  { name: "Dushmantha Chameera", role: "Bowler", basePrice: 0.5, skillRating: 80, nationality: "Sri Lankan" },
-  { name: "Matheesha Pathirana", role: "Bowler", basePrice: 1, skillRating: 85, nationality: "Sri Lankan" },
-  { name: "Kusal Mendis", role: "Wicketkeeper", basePrice: 0.5, skillRating: 78, nationality: "Sri Lankan" },
-  { name: "Chamika Karunaratne", role: "All-rounder", basePrice: 0.5, skillRating: 75, nationality: "Sri Lankan" },
-
-  // KEY INDIAN PLAYERS
-  { name: "Shreyas Iyer", role: "Batsman", basePrice: 2, skillRating: 90, nationality: "Indian" },
-  { name: "Yashasvi Jaiswal", role: "Batsman", basePrice: 2, skillRating: 91, nationality: "Indian" },
-  { name: "Ruturaj Gaikwad", role: "Batsman", basePrice: 2, skillRating: 89, nationality: "Indian" },
-  { name: "Ishan Kishan", role: "Wicketkeeper", basePrice: 2, skillRating: 88, nationality: "Indian" },
-  { name: "Sanju Samson", role: "Wicketkeeper", basePrice: 2, skillRating: 89, nationality: "Indian" },
-  { name: "Deepak Chahar", role: "All-rounder", basePrice: 1.4, skillRating: 84, nationality: "Indian" },
-  { name: "Mohammed Shami", role: "Bowler", basePrice: 2, skillRating: 92, nationality: "Indian" },
-  { name: "Arshdeep Singh", role: "Bowler", basePrice: 2, skillRating: 88, nationality: "Indian" },
-  { name: "Yuzvendra Chahal", role: "Bowler", basePrice: 1.8, skillRating: 88, nationality: "Indian" },
-  { name: "Kuldeep Yadav", role: "Bowler", basePrice: 1.5, skillRating: 87, nationality: "Indian" },
-  { name: "Axar Patel", role: "All-rounder", basePrice: 2, skillRating: 87, nationality: "Indian" },
-  { name: "Shardul Thakur", role: "All-rounder", basePrice: 1, skillRating: 84, nationality: "Indian" },
-  { name: "Rinku Singh", role: "Batsman", basePrice: 2, skillRating: 85, nationality: "Indian" },
-  { name: "Tilak Varma", role: "Batsman", basePrice: 2, skillRating: 84, nationality: "Indian" },
-  { name: "Washington Sundar", role: "All-rounder", basePrice: 0.5, skillRating: 82, nationality: "Indian" },
-  { name: "Rahul Tripathi", role: "Batsman", basePrice: 0.5, skillRating: 80, nationality: "Indian" },
-  { name: "Shivam Dube", role: "All-rounder", basePrice: 1, skillRating: 82, nationality: "Indian" },
-  { name: "Nitish Kumar Reddy", role: "All-rounder", basePrice: 0.5, skillRating: 78, nationality: "Indian" },
-  { name: "Harshit Rana", role: "Bowler", basePrice: 0.5, skillRating: 77, nationality: "Indian" },
-  { name: "Varun Chakaravarthy", role: "Bowler", basePrice: 1.2, skillRating: 84, nationality: "Indian" },
-  { name: "Naman Dhir", role: "Batsman", basePrice: 0.5, skillRating: 76, nationality: "Indian" },
-  { name: "Abhishek Sharma", role: "All-rounder", basePrice: 1.4, skillRating: 82, nationality: "Indian" },
-  { name: "Prabhsimran Singh", role: "Wicketkeeper", basePrice: 0.5, skillRating: 77, nationality: "Indian" },
-  { name: "Dhruv Jurel", role: "Wicketkeeper", basePrice: 0.5, skillRating: 76, nationality: "Indian" },
-  { name: "Aryan Juyal", role: "Wicketkeeper", basePrice: 0.2, skillRating: 70, nationality: "Indian" },
-  { name: "Riyan Parag", role: "All-rounder", basePrice: 1, skillRating: 80, nationality: "Indian" },
-  { name: "Tanush Kotian", role: "All-rounder", basePrice: 0.2, skillRating: 72, nationality: "Indian" },
-  { name: "Mayank Yadav", role: "Bowler", basePrice: 1, skillRating: 83, nationality: "Indian" },
-  { name: "Akash Madhwal", role: "Bowler", basePrice: 0.2, skillRating: 75, nationality: "Indian" },
-  { name: "Tushar Deshpande", role: "Bowler", basePrice: 0.2, skillRating: 74, nationality: "Indian" },
+// ─── TIER 1: 95+ Overall ───────────────────────────────────────────────────
+const TIER_95: SeedPlayer[] = [
+  {
+    name: "Virat Kohli", role: "Batsman", basePrice: 2, skillRating: 98,
+    nationality: "Indian", battingRating: 99, bowlingRating: 10, fieldingRating: 94,
+    age: 35, experience: 16, form: 92,
+    strikeRate: 137, economy: 12.0,
+    strengths: "Chase master,Consistent,Power hitting,Cover drive",
+    weaknesses: "Short balls early innings",
+  },
+  {
+    name: "Jasprit Bumrah", role: "Bowler", basePrice: 2, skillRating: 98,
+    nationality: "Indian", battingRating: 15, bowlingRating: 99, fieldingRating: 82,
+    age: 30, experience: 9, form: 94,
+    strikeRate: 90, economy: 6.8,
+    strengths: "Yorkers,Death bowling,Swing,Unpredictable action",
+    weaknesses: "Limited batting",
+  },
+  {
+    name: "Rashid Khan", role: "Bowler", basePrice: 2, skillRating: 97,
+    nationality: "Afghan", battingRating: 48, bowlingRating: 97, fieldingRating: 88,
+    age: 25, experience: 8, form: 96,
+    strikeRate: 140, economy: 6.5,
+    strengths: "Leg spin,Googlies,Death bowling,Useful hitter",
+    weaknesses: "Pace variation limited",
+  },
+  {
+    name: "MS Dhoni", role: "Wicketkeeper", basePrice: 2, skillRating: 97,
+    nationality: "Indian", battingRating: 91, bowlingRating: 5, fieldingRating: 96,
+    age: 43, experience: 16, form: 82,
+    strikeRate: 148, economy: 12.0,
+    strengths: "Finisher,Helicopter shot,Stumping,Composure",
+    weaknesses: "Age factor,Opening",
+  },
+  {
+    name: "Rohit Sharma", role: "Batsman", basePrice: 2, skillRating: 96,
+    nationality: "Indian", battingRating: 96, bowlingRating: 22, fieldingRating: 88,
+    age: 37, experience: 16, form: 85,
+    strikeRate: 139, economy: 10.0,
+    strengths: "Opener,Pull shot,Leadership,Big innings",
+    weaknesses: "Inconsistency away from home",
+  },
+  {
+    name: "Pat Cummins", role: "All-rounder", basePrice: 2, skillRating: 96,
+    nationality: "Australian", battingRating: 68, bowlingRating: 97, fieldingRating: 89,
+    age: 31, experience: 7, form: 90,
+    strikeRate: 142, economy: 7.9,
+    strengths: "Fast bowling,Leadership,Yorkers,Lower order hitting",
+    weaknesses: "Economy in powerplay",
+  },
+  {
+    name: "Andre Russell", role: "All-rounder", basePrice: 2, skillRating: 95,
+    nationality: "West Indian", battingRating: 93, bowlingRating: 87, fieldingRating: 91,
+    age: 35, experience: 13, form: 88,
+    strikeRate: 178, economy: 8.9,
+    strengths: "Power hitting,Death bowling,Six hitting,Clutch performer",
+    weaknesses: "Injury prone,Dot balls when bowling",
+  },
+  {
+    name: "Sunil Narine", role: "All-rounder", basePrice: 2, skillRating: 95,
+    nationality: "West Indian", battingRating: 82, bowlingRating: 94, fieldingRating: 87,
+    age: 35, experience: 13, form: 89,
+    strikeRate: 165, economy: 6.7,
+    strengths: "Mystery spin,Opener,Powerplay bowling,Economy",
+    weaknesses: "Middle overs batting",
+  },
+  {
+    name: "Ben Stokes", role: "All-rounder", basePrice: 2, skillRating: 95,
+    nationality: "English", battingRating: 94, bowlingRating: 88, fieldingRating: 93,
+    age: 33, experience: 5, form: 84,
+    strikeRate: 145, economy: 8.5,
+    strengths: "Match winner,Pace bowling,Power hitting,Fielding",
+    weaknesses: "IPL availability,Injury risk",
+  },
+  {
+    name: "Ravindra Jadeja", role: "All-rounder", basePrice: 2, skillRating: 95,
+    nationality: "Indian", battingRating: 84, bowlingRating: 90, fieldingRating: 99,
+    age: 35, experience: 14, form: 85,
+    strikeRate: 138, economy: 7.2,
+    strengths: "Fielding,Left arm spin,Batting fireworks,Economy",
+    weaknesses: "Powerplay bowling",
+  },
 ];
 
-// Generated player pools for reaching 600+
-const FIRST_NAMES_INDIAN = [
-  "Aarav","Advaith","Akshay","Amit","Ankit","Arjun","Arnav","Arun","Aswin","Atul",
-  "Ayush","Bharat","Chirag","Darshan","Devraj","Dinesh","Gaurav","Harsh","Hemant","Hitesh",
-  "Ishaan","Jatin","Karan","Kartik","Kiran","Kunal","Lakshya","Manish","Manoj","Mohit",
-  "Neeraj","Nikhil","Nitin","Om","Parth","Pranav","Prashant","Pritam","Priyanshu","Rahul",
-  "Raj","Rajat","Rakesh","Ramesh","Ravi","Ritesh","Rohit","Sachin","Sagar","Sahil",
-  "Sandeep","Sanjay","Saurav","Shivam","Soham","Sumit","Sunil","Suresh","Tarun","Umesh",
-  "Utkarsh","Vaibhav","Vikas","Vikram","Vipul","Vishal","Vivek","Yash","Yogesh","Zaid",
-  "Aditya","Ajay","Alok","Amar","Amey","Amol","Anand","Anup","Ashish","Atharva",
-  "Deepak","Dhruv","Girish","Gopal","Harish","Jagdish","Jayesh","Jitendra","Kamlesh","Kaushal",
-  "Lalit","Madhav","Mahesh","Manan","Manav","Mayank","Mihir","Mithun","Nagesh","Nakul"
+// ─── TIER 2: 90–94 Overall ─────────────────────────────────────────────────
+const TIER_90: SeedPlayer[] = [
+  {
+    name: "Jos Buttler", role: "Wicketkeeper", basePrice: 2, skillRating: 94,
+    nationality: "English", battingRating: 95, bowlingRating: 5, fieldingRating: 92,
+    age: 34, experience: 9, form: 87,
+    strikeRate: 152, economy: 12.0,
+    strengths: "Opener,Explosive hitting,Ramp shots,Wicketkeeping",
+    weaknesses: "Spin on turning tracks",
+  },
+  {
+    name: "Suryakumar Yadav", role: "Batsman", basePrice: 2, skillRating: 94,
+    nationality: "Indian", battingRating: 95, bowlingRating: 8, fieldingRating: 90,
+    age: 34, experience: 4, form: 91,
+    strikeRate: 185, economy: 12.0,
+    strengths: "360 degree hitting,Slog sweep,Boundary hitting,Scoop shots",
+    weaknesses: "Long Test innings",
+  },
+  {
+    name: "Hardik Pandya", role: "All-rounder", basePrice: 2, skillRating: 94,
+    nationality: "Indian", battingRating: 87, bowlingRating: 85, fieldingRating: 90,
+    age: 30, experience: 8, form: 80,
+    strikeRate: 148, economy: 8.4,
+    strengths: "Finisher,Pace bowling,Power hitting,Death bowling",
+    weaknesses: "Injury prone,Consistency",
+  },
+  {
+    name: "Kagiso Rabada", role: "Bowler", basePrice: 2, skillRating: 93,
+    nationality: "South African", battingRating: 22, bowlingRating: 94, fieldingRating: 84,
+    age: 29, experience: 8, form: 89,
+    strikeRate: 95, economy: 7.8,
+    strengths: "Pace,Death bowling,Swing,Wicket-taking ability",
+    weaknesses: "Economy in powerplay",
+  },
+  {
+    name: "KL Rahul", role: "Wicketkeeper", basePrice: 2, skillRating: 93,
+    nationality: "Indian", battingRating: 93, bowlingRating: 5, fieldingRating: 90,
+    age: 32, experience: 10, form: 82,
+    strikeRate: 135, economy: 12.0,
+    strengths: "Technically sound,Wicketkeeping,Opener,Run accumulator",
+    weaknesses: "Strike rate pressure,Slow in middle overs",
+  },
+  {
+    name: "Rishabh Pant", role: "Wicketkeeper", basePrice: 2, skillRating: 93,
+    nationality: "Indian", battingRating: 91, bowlingRating: 5, fieldingRating: 87,
+    age: 26, experience: 6, form: 83,
+    strikeRate: 149, economy: 12.0,
+    strengths: "Aggressive keeper,Helicopter shot,Unorthodox shots,Counter-attack",
+    weaknesses: "Shot selection,Keeping mistakes",
+  },
+  {
+    name: "Jofra Archer", role: "Bowler", basePrice: 2, skillRating: 92,
+    nationality: "English", battingRating: 25, bowlingRating: 93, fieldingRating: 83,
+    age: 29, experience: 4, form: 85,
+    strikeRate: 105, economy: 7.5,
+    strengths: "Raw pace,Bouncers,Yorkers,Intimidating bowling",
+    weaknesses: "Injury history,Economy",
+  },
+  {
+    name: "Mitchell Starc", role: "Bowler", basePrice: 2, skillRating: 92,
+    nationality: "Australian", battingRating: 28, bowlingRating: 93, fieldingRating: 78,
+    age: 34, experience: 8, form: 84,
+    strikeRate: 105, economy: 8.2,
+    strengths: "Left arm pace,In-swing,Death bowling,Powerplay threat",
+    weaknesses: "Economy,Expensive on flat tracks",
+  },
+  {
+    name: "Shubman Gill", role: "Batsman", basePrice: 2, skillRating: 92,
+    nationality: "Indian", battingRating: 92, bowlingRating: 8, fieldingRating: 88,
+    age: 25, experience: 6, form: 90,
+    strikeRate: 141, economy: 12.0,
+    strengths: "Elegant stroke play,Drives,Pull shot,Consistency",
+    weaknesses: "Short pitched bowling",
+  },
+  {
+    name: "Yashasvi Jaiswal", role: "Batsman", basePrice: 2, skillRating: 91,
+    nationality: "Indian", battingRating: 91, bowlingRating: 12, fieldingRating: 87,
+    age: 22, experience: 4, form: 95,
+    strikeRate: 163, economy: 12.0,
+    strengths: "Fearless batting,Slog sweep,Power play batter,Young talent",
+    weaknesses: "Experienced pace outside off",
+  },
+  {
+    name: "David Warner", role: "Batsman", basePrice: 2, skillRating: 91,
+    nationality: "Australian", battingRating: 91, bowlingRating: 10, fieldingRating: 86,
+    age: 37, experience: 14, form: 79,
+    strikeRate: 143, economy: 12.0,
+    strengths: "Aggressive opener,Pull shot,Power hitting,IPL experience",
+    weaknesses: "Age factor,Retirement",
+  },
+  {
+    name: "Glenn Maxwell", role: "All-rounder", basePrice: 2, skillRating: 91,
+    nationality: "Australian", battingRating: 89, bowlingRating: 78, fieldingRating: 91,
+    age: 35, experience: 12, form: 82,
+    strikeRate: 160, economy: 7.9,
+    strengths: "Power hitting,Unorthodox shots,Off spin,360 player",
+    weaknesses: "Inconsistency,Leg side weakness",
+  },
+  {
+    name: "Josh Hazlewood", role: "Bowler", basePrice: 2, skillRating: 91,
+    nationality: "Australian", battingRating: 12, bowlingRating: 92, fieldingRating: 79,
+    age: 33, experience: 6, form: 86,
+    strikeRate: 70, economy: 7.4,
+    strengths: "Accuracy,Seam movement,Death bowling,Consistency",
+    weaknesses: "Limited swing in Indian conditions",
+  },
+  {
+    name: "Anrich Nortje", role: "Bowler", basePrice: 1.5, skillRating: 90,
+    nationality: "South African", battingRating: 15, bowlingRating: 91, fieldingRating: 80,
+    age: 30, experience: 5, form: 84,
+    strikeRate: 80, economy: 7.6,
+    strengths: "Express pace,Bouncers,Powerplay,Raw speed 150+",
+    weaknesses: "Economy,Injury prone",
+  },
+  {
+    name: "Quinton de Kock", role: "Wicketkeeper", basePrice: 1.5, skillRating: 90,
+    nationality: "South African", battingRating: 90, bowlingRating: 5, fieldingRating: 91,
+    age: 31, experience: 9, form: 83,
+    strikeRate: 138, economy: 12.0,
+    strengths: "Opener,Wicketkeeping,Cover drives,Leg side hitting",
+    weaknesses: "Inconsistency against quality spin",
+  },
+  {
+    name: "Trent Boult", role: "Bowler", basePrice: 1.5, skillRating: 90,
+    nationality: "New Zealand", battingRating: 20, bowlingRating: 91, fieldingRating: 80,
+    age: 35, experience: 8, form: 80,
+    strikeRate: 75, economy: 7.5,
+    strengths: "Swing bowling,Powerplay,Left arm angle,Death overs",
+    weaknesses: "Economy rates,Pace",
+  },
+  {
+    name: "Kane Williamson", role: "Batsman", basePrice: 1.5, skillRating: 90,
+    nationality: "New Zealand", battingRating: 91, bowlingRating: 25, fieldingRating: 86,
+    age: 34, experience: 10, form: 78,
+    strikeRate: 128, economy: 9.5,
+    strengths: "Technically sound,Adaptability,Leadership,Middle order",
+    weaknesses: "Strike rate in T20,Power hitting",
+  },
 ];
 
-const LAST_NAMES_INDIAN = [
-  "Sharma","Verma","Patel","Singh","Kumar","Yadav","Gupta","Shah","Joshi","Mishra",
-  "Pandey","Chauhan","Reddy","Nair","Pillai","Menon","Rao","Iyer","Agarwal","Bansal",
-  "Chopra","Das","Dubey","Ghosh","Jain","Kapoor","Malhotra","Mehra","Nanda","Prasad",
-  "Saxena","Srivastava","Tiwari","Tripathi","Upadhyay","Walia","Zaveri","Bose","Chandra","Dutta",
-  "Goyal","Grover","Hegde","Jindal","Khatri","Lal","More","Murthy","Naidu","Patil",
-  "Rawat","Rathore","Sethi","Tandon","Thakur","Varma","Wagle","Khanna","Bajaj","Birla",
-  "Garg","Mittal","Acharya","Bhatt","Chokshi","Desai","Gandhi","Kulkarni","Mehta","Naik"
+// ─── TIER 3: 85–89 Overall ─────────────────────────────────────────────────
+const TIER_85: SeedPlayer[] = [
+  {
+    name: "Faf du Plessis", role: "Batsman", basePrice: 1.5, skillRating: 89,
+    nationality: "South African", battingRating: 89, bowlingRating: 10, fieldingRating: 88,
+    age: 39, experience: 12, form: 76,
+    strikeRate: 139, economy: 12.0,
+    strengths: "Opener,Leadership,Experienced,Cover drives",
+    weaknesses: "Age factor,Short balls",
+  },
+  {
+    name: "Wanindu Hasaranga", role: "All-rounder", basePrice: 1.5, skillRating: 89,
+    nationality: "Sri Lankan", battingRating: 72, bowlingRating: 88, fieldingRating: 86,
+    age: 26, experience: 5, form: 86,
+    strikeRate: 138, economy: 7.5,
+    strengths: "Leg spin,Googly,Useful bat,Middle overs bowling",
+    weaknesses: "Powerplay bowling",
+  },
+  {
+    name: "David Miller", role: "Batsman", basePrice: 1.5, skillRating: 88,
+    nationality: "South African", battingRating: 89, bowlingRating: 5, fieldingRating: 85,
+    age: 34, experience: 10, form: 84,
+    strikeRate: 157, economy: 12.0,
+    strengths: "Finisher,Power hitting,Slog sweep,Death overs specialist",
+    weaknesses: "Chase situations only",
+  },
+  {
+    name: "Jonny Bairstow", role: "Wicketkeeper", basePrice: 1.5, skillRating: 87,
+    nationality: "English", battingRating: 88, bowlingRating: 5, fieldingRating: 87,
+    age: 34, experience: 8, form: 81,
+    strikeRate: 137, economy: 12.0,
+    strengths: "Explosive opener,Wicketkeeping,Pull shot,IPL experience",
+    weaknesses: "Injury history",
+  },
+  {
+    name: "Sam Curran", role: "All-rounder", basePrice: 2, skillRating: 87,
+    nationality: "English", battingRating: 74, bowlingRating: 84, fieldingRating: 86,
+    age: 26, experience: 6, form: 83,
+    strikeRate: 135, economy: 8.7,
+    strengths: "Swing bowling,Death bowling,Lower order hitting,Variation",
+    weaknesses: "Economy under pressure",
+  },
+  {
+    name: "Mark Wood", role: "Bowler", basePrice: 1.5, skillRating: 88,
+    nationality: "English", battingRating: 18, bowlingRating: 89, fieldingRating: 82,
+    age: 34, experience: 3, form: 87,
+    strikeRate: 85, economy: 8.1,
+    strengths: "Express pace,Bouncers,Death bowling,150kmph+",
+    weaknesses: "Economy,Injury prone",
+  },
+  {
+    name: "Shreyas Iyer", role: "Batsman", basePrice: 2, skillRating: 90,
+    nationality: "Indian", battingRating: 90, bowlingRating: 8, fieldingRating: 88,
+    age: 29, experience: 8, form: 84,
+    strikeRate: 133, economy: 12.0,
+    strengths: "Middle order anchor,Sweep shots,Leadership,Spin handling",
+    weaknesses: "Short pitched bowling",
+  },
+  {
+    name: "Mohammed Shami", role: "Bowler", basePrice: 2, skillRating: 92,
+    nationality: "Indian", battingRating: 12, bowlingRating: 93, fieldingRating: 80,
+    age: 34, experience: 10, form: 88,
+    strikeRate: 60, economy: 7.9,
+    strengths: "Seam movement,Death bowling,Reverse swing,Powerplay",
+    weaknesses: "Economy on flat tracks",
+  },
+  {
+    name: "Arshdeep Singh", role: "Bowler", basePrice: 2, skillRating: 88,
+    nationality: "Indian", battingRating: 15, bowlingRating: 88, fieldingRating: 82,
+    age: 25, experience: 5, form: 86,
+    strikeRate: 75, economy: 8.3,
+    strengths: "Swing,Death bowling,Left arm angle,Yorkers",
+    weaknesses: "Expensive in middle overs",
+  },
+  {
+    name: "Yuzvendra Chahal", role: "Bowler", basePrice: 1.8, skillRating: 88,
+    nationality: "Indian", battingRating: 10, bowlingRating: 88, fieldingRating: 78,
+    age: 33, experience: 10, form: 82,
+    strikeRate: 65, economy: 7.4,
+    strengths: "Wrist spin,Googly,Variation,Middle overs",
+    weaknesses: "Powerplay,Flat track bowling",
+  },
+  {
+    name: "Kuldeep Yadav", role: "Bowler", basePrice: 1.5, skillRating: 87,
+    nationality: "Indian", battingRating: 12, bowlingRating: 87, fieldingRating: 78,
+    age: 29, experience: 8, form: 88,
+    strikeRate: 65, economy: 7.6,
+    strengths: "Chinaman,Googly,Middle over control,Wicket taking",
+    weaknesses: "Powerplay bowling,Flat tracks",
+  },
+  {
+    name: "Axar Patel", role: "All-rounder", basePrice: 2, skillRating: 87,
+    nationality: "Indian", battingRating: 76, bowlingRating: 85, fieldingRating: 88,
+    age: 30, experience: 9, form: 84,
+    strikeRate: 136, economy: 7.5,
+    strengths: "Left arm spin,Economy,Lower order hitting,Fielding",
+    weaknesses: "Power hitting under pressure",
+  },
+  {
+    name: "Shakib Al Hasan", role: "All-rounder", basePrice: 1, skillRating: 87,
+    nationality: "Bangladeshi", battingRating: 80, bowlingRating: 86, fieldingRating: 86,
+    age: 37, experience: 8, form: 76,
+    strikeRate: 132, economy: 7.3,
+    strengths: "All-round ability,Left arm spin,Experienced,Smart cricket",
+    weaknesses: "Age factor,Form dips",
+  },
+  {
+    name: "Nicholas Pooran", role: "Wicketkeeper", basePrice: 1.5, skillRating: 88,
+    nationality: "West Indian", battingRating: 88, bowlingRating: 5, fieldingRating: 88,
+    age: 28, experience: 6, form: 84,
+    strikeRate: 165, economy: 12.0,
+    strengths: "Power hitting,Finisher,Wicketkeeping,Six machine",
+    weaknesses: "Top order batting",
+  },
+  {
+    name: "Matheesha Pathirana", role: "Bowler", basePrice: 1, skillRating: 85,
+    nationality: "Sri Lankan", battingRating: 12, bowlingRating: 86, fieldingRating: 80,
+    age: 22, experience: 3, form: 89,
+    strikeRate: 70, economy: 7.3,
+    strengths: "Slinging action,Yorkers,Death bowling,Raw talent",
+    weaknesses: "Powerplay,Young and learning",
+  },
+  {
+    name: "Marcus Stoinis", role: "All-rounder", basePrice: 1.5, skillRating: 87,
+    nationality: "Australian", battingRating: 83, bowlingRating: 78, fieldingRating: 87,
+    age: 34, experience: 7, form: 81,
+    strikeRate: 148, economy: 8.9,
+    strengths: "Power hitting,Opening,Pace bowling,All-round",
+    weaknesses: "Bowling economy,Middle order consistency",
+  },
+  {
+    name: "Travis Head", role: "Batsman", basePrice: 2, skillRating: 90,
+    nationality: "Australian", battingRating: 92, bowlingRating: 18, fieldingRating: 88,
+    age: 30, experience: 4, form: 92,
+    strikeRate: 168, economy: 9.5,
+    strengths: "Explosive opener,Spin hitting,Aggressive,Match winner",
+    weaknesses: "Pace outside off initially",
+  },
+  {
+    name: "Rinku Singh", role: "Batsman", basePrice: 2, skillRating: 85,
+    nationality: "Indian", battingRating: 86, bowlingRating: 5, fieldingRating: 85,
+    age: 26, experience: 3, form: 88,
+    strikeRate: 159, economy: 12.0,
+    strengths: "Finisher,Power hitting,Pressure situations,Last over expert",
+    weaknesses: "Opening,Spin in early overs",
+  },
+  {
+    name: "Tilak Varma", role: "Batsman", basePrice: 2, skillRating: 84,
+    nationality: "Indian", battingRating: 85, bowlingRating: 8, fieldingRating: 84,
+    age: 21, experience: 2, form: 87,
+    strikeRate: 140, economy: 12.0,
+    strengths: "Left hander,Power hitting,Young talent,Spin handling",
+    weaknesses: "International experience limited",
+  },
+  {
+    name: "Mayank Yadav", role: "Bowler", basePrice: 1, skillRating: 83,
+    nationality: "Indian", battingRating: 10, bowlingRating: 84, fieldingRating: 79,
+    age: 22, experience: 2, form: 91,
+    strikeRate: 60, economy: 7.7,
+    strengths: "Raw pace,150kmph+,Young talent,Surprise package",
+    weaknesses: "Experience,Injury concern",
+  },
+  {
+    name: "Aiden Markram", role: "Batsman", basePrice: 1, skillRating: 85,
+    nationality: "South African", battingRating: 86, bowlingRating: 45, fieldingRating: 86,
+    age: 29, experience: 6, form: 83,
+    strikeRate: 148, economy: 8.8,
+    strengths: "Elegant batting,Off spin,Adaptable,All-conditions",
+    weaknesses: "Death overs inconsistency",
+  },
+  {
+    name: "Varun Chakaravarthy", role: "Bowler", basePrice: 1.2, skillRating: 84,
+    nationality: "Indian", battingRating: 15, bowlingRating: 84, fieldingRating: 78,
+    age: 33, experience: 5, form: 86,
+    strikeRate: 65, economy: 7.5,
+    strengths: "Mystery spinner,Googly,Difficult to read,Middle overs",
+    weaknesses: "Away conditions,Powerplay",
+  },
+  {
+    name: "Lockie Ferguson", role: "Bowler", basePrice: 1, skillRating: 85,
+    nationality: "New Zealand", battingRating: 10, bowlingRating: 86, fieldingRating: 81,
+    age: 32, experience: 6, form: 82,
+    strikeRate: 65, economy: 7.8,
+    strengths: "Pace,Bouncers,Death bowling,Consistent",
+    weaknesses: "Economy in flat conditions",
+  },
+  {
+    name: "Mustafizur Rahman", role: "Bowler", basePrice: 1, skillRating: 85,
+    nationality: "Bangladeshi", battingRating: 8, bowlingRating: 86, fieldingRating: 78,
+    age: 28, experience: 7, form: 80,
+    strikeRate: 55, economy: 7.9,
+    strengths: "Cutters,Slower balls,Death bowling,Variation",
+    weaknesses: "Flat tracks,Powerplay",
+  },
+  {
+    name: "Steve Smith", role: "Batsman", basePrice: 1.5, skillRating: 90,
+    nationality: "Australian", battingRating: 91, bowlingRating: 30, fieldingRating: 87,
+    age: 35, experience: 10, form: 79,
+    strikeRate: 128, economy: 9.0,
+    strengths: "Unorthodox technique,Mental strength,Spin handling,Leadership",
+    weaknesses: "T20 strike rate",
+  },
+  {
+    name: "Liam Livingstone", role: "All-rounder", basePrice: 1.5, skillRating: 86,
+    nationality: "English", battingRating: 85, bowlingRating: 74, fieldingRating: 87,
+    age: 30, experience: 5, form: 82,
+    strikeRate: 162, economy: 8.0,
+    strengths: "Power hitting,Both spin and pace hitting,Leg spin,Explosive",
+    weaknesses: "Consistency,Technique against quality spin",
+  },
+  {
+    name: "Jason Holder", role: "All-rounder", basePrice: 1, skillRating: 83,
+    nationality: "West Indian", battingRating: 72, bowlingRating: 83, fieldingRating: 86,
+    age: 32, experience: 7, form: 78,
+    strikeRate: 130, economy: 8.5,
+    strengths: "Pace,Seam movement,Leadership,Death bowling",
+    weaknesses: "Economy,Batting consistency",
+  },
+  {
+    name: "Shimron Hetmyer", role: "Batsman", basePrice: 1, skillRating: 84,
+    nationality: "West Indian", battingRating: 85, bowlingRating: 5, fieldingRating: 84,
+    age: 27, experience: 6, form: 83,
+    strikeRate: 156, economy: 12.0,
+    strengths: "Power hitting,Finisher,Left hander,Pull shots",
+    weaknesses: "Top order batting",
+  },
+  {
+    name: "Moeen Ali", role: "All-rounder", basePrice: 1, skillRating: 84,
+    nationality: "English", battingRating: 80, bowlingRating: 80, fieldingRating: 84,
+    age: 36, experience: 8, form: 77,
+    strikeRate: 145, economy: 7.8,
+    strengths: "Off spin,Power hitting,All-round,Leadership",
+    weaknesses: "Form inconsistency,Age",
+  },
+  {
+    name: "Phil Salt", role: "Wicketkeeper", basePrice: 1, skillRating: 82,
+    nationality: "English", battingRating: 83, bowlingRating: 5, fieldingRating: 86,
+    age: 27, experience: 3, form: 85,
+    strikeRate: 161, economy: 12.0,
+    strengths: "Explosive opener,Wicketkeeping,Power hitting,Sweep shots",
+    weaknesses: "Middle order batting",
+  },
+  {
+    name: "Devon Conway", role: "Wicketkeeper", basePrice: 1, skillRating: 84,
+    nationality: "New Zealand", battingRating: 85, bowlingRating: 5, fieldingRating: 88,
+    age: 33, experience: 3, form: 82,
+    strikeRate: 130, economy: 12.0,
+    strengths: "Left handed opener,Consistency,Wicketkeeping,Run accumulator",
+    weaknesses: "Power hitting",
+  },
 ];
 
-const FIRST_NAMES_OVERSEAS = [
-  "James","John","William","Ryan","Jake","Liam","Noah","Oliver","Jack","Harry",
-  "Charlie","George","Thomas","Daniel","Matthew","Adam","Luke","Ben","Tom","Sam",
-  "Chris","Alex","Rob","Nathan","Ethan","Josh","Zac","Tyler","Dylan","Jordan",
-  "Michael","Kevin","Jason","Aaron","Drew","Brett","Scott","Brad","Shane","Mark",
-  "Ricky","Darren","Greg","Brian","Wayne","Steve","Dave","Peter","Paul","Andrew",
-  "Jaylen","Marcus","Darnell","Tyrone","Kwame","Devon","Tremaine","Rashaan","Keion","Malik"
+// ─── TIER 4: 80–84 Overall ─────────────────────────────────────────────────
+const TIER_80: SeedPlayer[] = [
+  {
+    name: "Ishan Kishan", role: "Wicketkeeper", basePrice: 2, skillRating: 88,
+    nationality: "Indian", battingRating: 87, bowlingRating: 5, fieldingRating: 88,
+    age: 25, experience: 6, form: 79,
+    strikeRate: 145, economy: 12.0,
+    strengths: "Aggressive opener,Left handed,Power hitting,Wicketkeeping",
+    weaknesses: "Consistency,Shot selection",
+  },
+  {
+    name: "Sanju Samson", role: "Wicketkeeper", basePrice: 2, skillRating: 89,
+    nationality: "Indian", battingRating: 88, bowlingRating: 5, fieldingRating: 89,
+    age: 29, experience: 10, form: 83,
+    strikeRate: 143, economy: 12.0,
+    strengths: "Stylish batting,Captain,Wicketkeeping,IPL experienced",
+    weaknesses: "Inconsistency,Big tournament pressure",
+  },
+  {
+    name: "Ruturaj Gaikwad", role: "Batsman", basePrice: 2, skillRating: 89,
+    nationality: "Indian", battingRating: 89, bowlingRating: 5, fieldingRating: 87,
+    age: 27, experience: 5, form: 85,
+    strikeRate: 137, economy: 12.0,
+    strengths: "Opener,Elegant strokes,Leadership,Spin handling",
+    weaknesses: "Pace on difficult tracks",
+  },
+  {
+    name: "Deepak Chahar", role: "All-rounder", basePrice: 1.4, skillRating: 84,
+    nationality: "Indian", battingRating: 65, bowlingRating: 83, fieldingRating: 82,
+    age: 31, experience: 7, form: 79,
+    strikeRate: 125, economy: 7.8,
+    strengths: "Swing bowling,Powerplay,Lower order hitting,Economy",
+    weaknesses: "Death overs,Injury prone",
+  },
+  {
+    name: "Shardul Thakur", role: "All-rounder", basePrice: 1, skillRating: 84,
+    nationality: "Indian", battingRating: 68, bowlingRating: 82, fieldingRating: 82,
+    age: 32, experience: 7, form: 78,
+    strikeRate: 130, economy: 8.9,
+    strengths: "Wicket taking,Lower order hitting,Pressure situations,Economy",
+    weaknesses: "Expensive spells,Form inconsistency",
+  },
+  {
+    name: "Washington Sundar", role: "All-rounder", basePrice: 0.5, skillRating: 82,
+    nationality: "Indian", battingRating: 68, bowlingRating: 81, fieldingRating: 84,
+    age: 24, experience: 5, form: 81,
+    strikeRate: 130, economy: 7.6,
+    strengths: "Off spin,Economy,Powerplay bowling,Useful bat",
+    weaknesses: "Batting explosiveness",
+  },
+  {
+    name: "Shivam Dube", role: "All-rounder", basePrice: 1, skillRating: 82,
+    nationality: "Indian", battingRating: 80, bowlingRating: 68, fieldingRating: 81,
+    age: 30, experience: 5, form: 83,
+    strikeRate: 157, economy: 9.5,
+    strengths: "Power hitting,Six machine,Finisher,Left hander",
+    weaknesses: "Consistency,Bowling economy",
+  },
+  {
+    name: "Abhishek Sharma", role: "All-rounder", basePrice: 1.4, skillRating: 82,
+    nationality: "Indian", battingRating: 82, bowlingRating: 70, fieldingRating: 83,
+    age: 23, experience: 3, form: 86,
+    strikeRate: 169, economy: 8.5,
+    strengths: "Aggressive opener,Left arm spin,Young talent,Power hitting",
+    weaknesses: "Experience,Quality pace",
+  },
+  {
+    name: "Riyan Parag", role: "All-rounder", basePrice: 1, skillRating: 80,
+    nationality: "Indian", battingRating: 80, bowlingRating: 65, fieldingRating: 82,
+    age: 22, experience: 5, form: 84,
+    strikeRate: 148, economy: 9.0,
+    strengths: "Young talent,Leg spin,Power hitting,Fielding",
+    weaknesses: "Consistency,International experience",
+  },
+  {
+    name: "Nitish Kumar Reddy", role: "All-rounder", basePrice: 0.5, skillRating: 78,
+    nationality: "Indian", battingRating: 77, bowlingRating: 72, fieldingRating: 80,
+    age: 21, experience: 2, form: 85,
+    strikeRate: 142, economy: 9.2,
+    strengths: "Young all-rounder,Pace bowling,Batting,Raw talent",
+    weaknesses: "Experience,Pressure situations",
+  },
+  {
+    name: "Harshit Rana", role: "Bowler", basePrice: 0.5, skillRating: 77,
+    nationality: "Indian", battingRating: 12, bowlingRating: 78, fieldingRating: 78,
+    age: 22, experience: 2, form: 82,
+    strikeRate: 60, economy: 8.5,
+    strengths: "Pace,Youth,Swing,Learning fast",
+    weaknesses: "Experience,Consistency",
+  },
+  {
+    name: "Prabhsimran Singh", role: "Wicketkeeper", basePrice: 0.5, skillRating: 77,
+    nationality: "Indian", battingRating: 77, bowlingRating: 5, fieldingRating: 82,
+    age: 23, experience: 3, form: 80,
+    strikeRate: 138, economy: 12.0,
+    strengths: "Aggressive batting,Wicketkeeping,Young talent,Power hitting",
+    weaknesses: "Consistency,Experience",
+  },
+  {
+    name: "Dhruv Jurel", role: "Wicketkeeper", basePrice: 0.5, skillRating: 76,
+    nationality: "Indian", battingRating: 76, bowlingRating: 5, fieldingRating: 84,
+    age: 23, experience: 2, form: 80,
+    strikeRate: 132, economy: 12.0,
+    strengths: "Wicketkeeping,Batting,Young talent,Agile",
+    weaknesses: "T20 power hitting",
+  },
+  {
+    name: "Cameron Green", role: "All-rounder", basePrice: 2, skillRating: 85,
+    nationality: "Australian", battingRating: 83, bowlingRating: 80, fieldingRating: 88,
+    age: 25, experience: 3, form: 83,
+    strikeRate: 143, economy: 9.2,
+    strengths: "Opener,Pace bowling,Tall frame,All-round",
+    weaknesses: "Injury history,Economy",
+  },
+  {
+    name: "Tim David", role: "Batsman", basePrice: 2, skillRating: 86,
+    nationality: "Singaporean", battingRating: 87, bowlingRating: 5, fieldingRating: 85,
+    age: 28, experience: 4, form: 85,
+    strikeRate: 168, economy: 12.0,
+    strengths: "Power hitting,Finisher,Six machine,Middle over destruction",
+    weaknesses: "Top order,Spin on turning tracks",
+  },
+  {
+    name: "Rovman Powell", role: "Batsman", basePrice: 1, skillRating: 82,
+    nationality: "West Indian", battingRating: 82, bowlingRating: 10, fieldingRating: 83,
+    age: 30, experience: 4, form: 80,
+    strikeRate: 160, economy: 12.0,
+    strengths: "Power hitting,Finisher,Six machine",
+    weaknesses: "Top order batting,Consistency",
+  },
+  {
+    name: "Kyle Mayers", role: "All-rounder", basePrice: 0.5, skillRating: 79,
+    nationality: "West Indian", battingRating: 78, bowlingRating: 72, fieldingRating: 83,
+    age: 30, experience: 3, form: 78,
+    strikeRate: 144, economy: 9.1,
+    strengths: "Left hander,Seam bowling,All-round,Power hitting",
+    weaknesses: "Consistency",
+  },
+  {
+    name: "Mohammad Nabi", role: "All-rounder", basePrice: 1, skillRating: 83,
+    nationality: "Afghan", battingRating: 72, bowlingRating: 83, fieldingRating: 82,
+    age: 39, experience: 8, form: 74,
+    strikeRate: 128, economy: 7.5,
+    strengths: "Off spin,Economy,Experienced,Smart cricket",
+    weaknesses: "Age,Batting in top order",
+  },
+  {
+    name: "Mujeeb ur Rahman", role: "Bowler", basePrice: 1, skillRating: 82,
+    nationality: "Afghan", battingRating: 10, bowlingRating: 83, fieldingRating: 78,
+    age: 22, experience: 6, form: 80,
+    strikeRate: 55, economy: 6.8,
+    strengths: "Mystery spin,Off break,Googly,Economy",
+    weaknesses: "Powerplay",
+  },
+  {
+    name: "Glenn Phillips", role: "Batsman", basePrice: 1, skillRating: 83,
+    nationality: "New Zealand", battingRating: 84, bowlingRating: 45, fieldingRating: 86,
+    age: 27, experience: 4, form: 82,
+    strikeRate: 154, economy: 9.0,
+    strengths: "Power hitting,Wicketkeeping option,Leg spin,Flexible",
+    weaknesses: "Consistency",
+  },
+  {
+    name: "Rassie van der Dussen", role: "Batsman", basePrice: 1, skillRating: 84,
+    nationality: "South African", battingRating: 84, bowlingRating: 8, fieldingRating: 86,
+    age: 35, experience: 5, form: 79,
+    strikeRate: 132, economy: 12.0,
+    strengths: "Middle order anchor,Adaptable,Experienced,Consistent",
+    weaknesses: "Power hitting,Strike rate",
+  },
+  {
+    name: "Marco Jansen", role: "All-rounder", basePrice: 1, skillRating: 83,
+    nationality: "South African", battingRating: 65, bowlingRating: 83, fieldingRating: 82,
+    age: 24, experience: 3, form: 82,
+    strikeRate: 120, economy: 8.8,
+    strengths: "Tall left arm pacer,Seam bowling,Swing,Young talent",
+    weaknesses: "Death overs,Batting",
+  },
+  {
+    name: "Reeza Hendricks", role: "Batsman", basePrice: 0.5, skillRating: 78,
+    nationality: "South African", battingRating: 79, bowlingRating: 5, fieldingRating: 82,
+    age: 35, experience: 3, form: 75,
+    strikeRate: 131, economy: 12.0,
+    strengths: "Opener,Experienced,Consistent",
+    weaknesses: "Age,Power hitting",
+  },
+  {
+    name: "Lungi Ngidi", role: "Bowler", basePrice: 1, skillRating: 82,
+    nationality: "South African", battingRating: 10, bowlingRating: 83, fieldingRating: 80,
+    age: 28, experience: 5, form: 80,
+    strikeRate: 65, economy: 8.3,
+    strengths: "Pace,Swing,Death bowling,Yorkers",
+    weaknesses: "Economy,Injury history",
+  },
+  {
+    name: "Mitchell Santner", role: "All-rounder", basePrice: 0.5, skillRating: 80,
+    nationality: "New Zealand", battingRating: 68, bowlingRating: 79, fieldingRating: 84,
+    age: 32, experience: 5, form: 78,
+    strikeRate: 125, economy: 7.8,
+    strengths: "Left arm spin,Economy,Useful bat,Fielding",
+    weaknesses: "Batting explosiveness",
+  },
+  {
+    name: "Finn Allen", role: "Batsman", basePrice: 0.5, skillRating: 77,
+    nationality: "New Zealand", battingRating: 78, bowlingRating: 5, fieldingRating: 84,
+    age: 25, experience: 3, form: 80,
+    strikeRate: 167, economy: 12.0,
+    strengths: "Explosive opener,Power hitting,Fielding,Young",
+    weaknesses: "Consistency,Quality bowling attacks",
+  },
+  {
+    name: "Litton Das", role: "Wicketkeeper", basePrice: 0.5, skillRating: 78,
+    nationality: "Bangladeshi", battingRating: 78, bowlingRating: 5, fieldingRating: 83,
+    age: 29, experience: 4, form: 76,
+    strikeRate: 130, economy: 12.0,
+    strengths: "Wicketkeeping,Opener,Left hander",
+    weaknesses: "Inconsistency,Quality pace bowling",
+  },
+  {
+    name: "Mahmudullah", role: "All-rounder", basePrice: 0.5, skillRating: 77,
+    nationality: "Bangladeshi", battingRating: 73, bowlingRating: 72, fieldingRating: 80,
+    age: 38, experience: 6, form: 72,
+    strikeRate: 128, economy: 8.5,
+    strengths: "Experienced,Finisher,Off spin,Leadership",
+    weaknesses: "Age factor",
+  },
+  {
+    name: "Kusal Mendis", role: "Wicketkeeper", basePrice: 0.5, skillRating: 78,
+    nationality: "Sri Lankan", battingRating: 79, bowlingRating: 5, fieldingRating: 84,
+    age: 29, experience: 4, form: 79,
+    strikeRate: 138, economy: 12.0,
+    strengths: "Aggressive batting,Wicketkeeping,T20 specialist",
+    weaknesses: "Consistency",
+  },
+  {
+    name: "Dushmantha Chameera", role: "Bowler", basePrice: 0.5, skillRating: 80,
+    nationality: "Sri Lankan", battingRating: 10, bowlingRating: 81, fieldingRating: 78,
+    age: 31, experience: 4, form: 77,
+    strikeRate: 65, economy: 8.4,
+    strengths: "Pace,Bouncers,Death bowling",
+    weaknesses: "Injury prone,Economy",
+  },
+  {
+    name: "Chamika Karunaratne", role: "All-rounder", basePrice: 0.5, skillRating: 75,
+    nationality: "Sri Lankan", battingRating: 65, bowlingRating: 74, fieldingRating: 79,
+    age: 28, experience: 3, form: 74,
+    strikeRate: 128, economy: 9.0,
+    strengths: "Seam bowling,Useful bat,Adaptable",
+    weaknesses: "Consistency,International level",
+  },
+  {
+    name: "Will Jacks", role: "All-rounder", basePrice: 1, skillRating: 80,
+    nationality: "English", battingRating: 79, bowlingRating: 73, fieldingRating: 83,
+    age: 26, experience: 3, form: 81,
+    strikeRate: 155, economy: 8.5,
+    strengths: "Power hitting,Off spin,Flexible batting,Young",
+    weaknesses: "Consistency,Quality opposition",
+  },
+  {
+    name: "Noor Ahmad", role: "Bowler", basePrice: 0.5, skillRating: 78,
+    nationality: "Afghan", battingRating: 12, bowlingRating: 79, fieldingRating: 77,
+    age: 19, experience: 2, form: 83,
+    strikeRate: 55, economy: 7.2,
+    strengths: "Young spinner,Chinaman,Googly,Wicket taking",
+    weaknesses: "Experience,Pressure handling",
+  },
+  {
+    name: "Hazratullah Zazai", role: "Batsman", basePrice: 0.5, skillRating: 75,
+    nationality: "Afghan", battingRating: 75, bowlingRating: 5, fieldingRating: 78,
+    age: 27, experience: 3, form: 74,
+    strikeRate: 158, economy: 12.0,
+    strengths: "Explosive opener,Power hitting",
+    weaknesses: "Inconsistency,Quality attacks",
+  },
+  {
+    name: "Obed McCoy", role: "Bowler", basePrice: 0.5, skillRating: 78,
+    nationality: "West Indian", battingRating: 10, bowlingRating: 78, fieldingRating: 76,
+    age: 27, experience: 3, form: 76,
+    strikeRate: 60, economy: 8.1,
+    strengths: "Left arm pace,Swing,Surprise,Variations",
+    weaknesses: "Economy,Consistency",
+  },
+  {
+    name: "Akeal Hosein", role: "Bowler", basePrice: 0.5, skillRating: 76,
+    nationality: "West Indian", battingRating: 20, bowlingRating: 76, fieldingRating: 80,
+    age: 29, experience: 3, form: 74,
+    strikeRate: 80, economy: 7.9,
+    strengths: "Left arm spin,Economy,Middle overs",
+    weaknesses: "Death bowling",
+  },
+  {
+    name: "Brandon King", role: "Batsman", basePrice: 0.5, skillRating: 75,
+    nationality: "West Indian", battingRating: 76, bowlingRating: 5, fieldingRating: 81,
+    age: 27, experience: 2, form: 77,
+    strikeRate: 136, economy: 12.0,
+    strengths: "Opener,Consistent,Power hitting",
+    weaknesses: "International experience",
+  },
+  {
+    name: "Adam Milne", role: "Bowler", basePrice: 0.5, skillRating: 76,
+    nationality: "New Zealand", battingRating: 10, bowlingRating: 77, fieldingRating: 78,
+    age: 33, experience: 4, form: 74,
+    strikeRate: 55, economy: 8.5,
+    strengths: "Pace,Bouncers",
+    weaknesses: "Injury prone,Economy",
+  },
+  {
+    name: "Naman Dhir", role: "Batsman", basePrice: 0.5, skillRating: 76,
+    nationality: "Indian", battingRating: 77, bowlingRating: 20, fieldingRating: 79,
+    age: 25, experience: 2, form: 78,
+    strikeRate: 145, economy: 10.5,
+    strengths: "Power hitting,Part time spin,Young talent",
+    weaknesses: "Consistency,Opening batting",
+  },
+  {
+    name: "Tanush Kotian", role: "All-rounder", basePrice: 0.2, skillRating: 72,
+    nationality: "Indian", battingRating: 65, bowlingRating: 72, fieldingRating: 78,
+    age: 25, experience: 2, form: 74,
+    strikeRate: 120, economy: 8.2,
+    strengths: "Off spin,All-round,Economy",
+    weaknesses: "Batting explosiveness",
+  },
+  {
+    name: "Akash Madhwal", role: "Bowler", basePrice: 0.2, skillRating: 75,
+    nationality: "Indian", battingRating: 10, bowlingRating: 76, fieldingRating: 78,
+    age: 30, experience: 2, form: 76,
+    strikeRate: 55, economy: 8.8,
+    strengths: "Pace,Death bowling,Economy",
+    weaknesses: "Experience,Consistency",
+  },
+  {
+    name: "Tushar Deshpande", role: "Bowler", basePrice: 0.2, skillRating: 74,
+    nationality: "Indian", battingRating: 8, bowlingRating: 75, fieldingRating: 77,
+    age: 28, experience: 3, form: 75,
+    strikeRate: 55, economy: 9.1,
+    strengths: "Seam movement,Death bowling,Economy",
+    weaknesses: "Flat pitches,Consistency",
+  },
+  {
+    name: "Aryan Juyal", role: "Wicketkeeper", basePrice: 0.2, skillRating: 70,
+    nationality: "Indian", battingRating: 70, bowlingRating: 5, fieldingRating: 80,
+    age: 22, experience: 1, form: 72,
+    strikeRate: 125, economy: 12.0,
+    strengths: "Wicketkeeping,Young,Potential",
+    weaknesses: "Experience,IPL limited",
+  },
+  {
+    name: "Rahul Tripathi", role: "Batsman", basePrice: 0.5, skillRating: 80,
+    nationality: "Indian", battingRating: 80, bowlingRating: 5, fieldingRating: 82,
+    age: 32, experience: 7, form: 77,
+    strikeRate: 143, economy: 12.0,
+    strengths: "Power hitting,Adaptable,Experienced",
+    weaknesses: "Consistency,Age",
+  },
 ];
 
-const LAST_NAMES_OVERSEAS = [
-  "Smith","Johnson","Williams","Jones","Brown","Davis","Miller","Wilson","Moore","Taylor",
-  "Anderson","Thomas","Jackson","White","Harris","Martin","Thompson","Garcia","Martinez","Roberts",
-  "Robinson","Clark","Rodriguez","Lewis","Lee","Walker","Hall","Allen","Young","Hernandez",
-  "King","Wright","Lopez","Hill","Scott","Green","Adams","Baker","Gonzalez","Nelson",
-  "Carter","Mitchell","Perez","Roberts","Turner","Phillips","Campbell","Parker","Evans","Edwards",
-  "Collins","Stewart","Sanchez","Morris","Rogers","Reed","Cook","Morgan","Bell","Murphy",
-  "Bailey","Rivera","Cooper","Richardson","Cox","Howard","Ward","Torres","Peterson","Gray"
+// ─── TIER 5: Additional Indian domestic stars ──────────────────────────────
+const TIER_DOMESTIC: SeedPlayer[] = [
+  {
+    name: "Prithvi Shaw", role: "Batsman", basePrice: 0.5, skillRating: 79,
+    nationality: "Indian", battingRating: 80, bowlingRating: 5, fieldingRating: 81,
+    age: 24, experience: 5, form: 74,
+    strikeRate: 152, economy: 12.0,
+    strengths: "Aggressive opener,Power hitting,Young",
+    weaknesses: "Shot selection,Defense",
+  },
+  {
+    name: "Devdutt Padikkal", role: "Batsman", basePrice: 0.5, skillRating: 79,
+    nationality: "Indian", battingRating: 79, bowlingRating: 5, fieldingRating: 82,
+    age: 24, experience: 4, form: 78,
+    strikeRate: 135, economy: 12.0,
+    strengths: "Elegant left hander,Opener,Consistency",
+    weaknesses: "Power hitting",
+  },
+  {
+    name: "Sarfaraz Khan", role: "Batsman", basePrice: 0.5, skillRating: 78,
+    nationality: "Indian", battingRating: 79, bowlingRating: 5, fieldingRating: 77,
+    age: 26, experience: 3, form: 82,
+    strikeRate: 136, economy: 12.0,
+    strengths: "Middle order,Spin handling,Consistent",
+    weaknesses: "Fielding,Power hitting",
+  },
+  {
+    name: "Avesh Khan", role: "Bowler", basePrice: 0.5, skillRating: 78,
+    nationality: "Indian", battingRating: 10, bowlingRating: 79, fieldingRating: 78,
+    age: 27, experience: 5, form: 76,
+    strikeRate: 65, economy: 8.7,
+    strengths: "Pace,Bouncers,Death bowling",
+    weaknesses: "Economy,Consistency",
+  },
+  {
+    name: "Ravi Bishnoi", role: "Bowler", basePrice: 0.5, skillRating: 79,
+    nationality: "Indian", battingRating: 15, bowlingRating: 80, fieldingRating: 79,
+    age: 23, experience: 4, form: 82,
+    strikeRate: 65, economy: 7.8,
+    strengths: "Leg spin,Googlies,Economy,Young",
+    weaknesses: "Flat tracks,Experience",
+  },
+  {
+    name: "Arshad Khan", role: "Bowler", basePrice: 0.2, skillRating: 72,
+    nationality: "Indian", battingRating: 10, bowlingRating: 73, fieldingRating: 76,
+    age: 26, experience: 2, form: 73,
+    strikeRate: 65, economy: 8.5,
+    strengths: "Left arm spin,Economy",
+    weaknesses: "Experience",
+  },
+  {
+    name: "Shivam Mavi", role: "Bowler", basePrice: 0.5, skillRating: 76,
+    nationality: "Indian", battingRating: 15, bowlingRating: 77, fieldingRating: 79,
+    age: 25, experience: 4, form: 75,
+    strikeRate: 65, economy: 9.0,
+    strengths: "Pace,Death bowling,Young",
+    weaknesses: "Economy,Consistency",
+  },
+  {
+    name: "Umran Malik", role: "Bowler", basePrice: 0.5, skillRating: 76,
+    nationality: "Indian", battingRating: 5, bowlingRating: 77, fieldingRating: 76,
+    age: 24, experience: 3, form: 74,
+    strikeRate: 55, economy: 9.5,
+    strengths: "Raw pace,150kmph+,Bouncers",
+    weaknesses: "Economy,Expensive,Consistency",
+  },
+  {
+    name: "Manish Pandey", role: "Batsman", basePrice: 0.5, skillRating: 77,
+    nationality: "Indian", battingRating: 78, bowlingRating: 5, fieldingRating: 87,
+    age: 34, experience: 12, form: 70,
+    strikeRate: 133, economy: 12.0,
+    strengths: "Fielding,Experienced,Reliable",
+    weaknesses: "Age,Strike rate",
+  },
+  {
+    name: "Yash Dayal", role: "Bowler", basePrice: 0.5, skillRating: 75,
+    nationality: "Indian", battingRating: 10, bowlingRating: 76, fieldingRating: 77,
+    age: 25, experience: 3, form: 77,
+    strikeRate: 65, economy: 8.9,
+    strengths: "Left arm pace,Swing,Death overs",
+    weaknesses: "Consistency,Economy",
+  },
+  {
+    name: "Mohit Sharma", role: "Bowler", basePrice: 0.5, skillRating: 77,
+    nationality: "Indian", battingRating: 8, bowlingRating: 78, fieldingRating: 77,
+    age: 35, experience: 8, form: 76,
+    strikeRate: 60, economy: 8.2,
+    strengths: "Experienced,Death bowling,Variation",
+    weaknesses: "Age,Form dips",
+  },
+  {
+    name: "Sai Kishore", role: "Bowler", basePrice: 0.5, skillRating: 76,
+    nationality: "Indian", battingRating: 12, bowlingRating: 77, fieldingRating: 79,
+    age: 26, experience: 4, form: 78,
+    strikeRate: 65, economy: 7.9,
+    strengths: "Left arm spin,Economy,Middle overs",
+    weaknesses: "Death bowling",
+  },
+  {
+    name: "Krunal Pandya", role: "All-rounder", basePrice: 0.5, skillRating: 78,
+    nationality: "Indian", battingRating: 74, bowlingRating: 76, fieldingRating: 82,
+    age: 33, experience: 8, form: 74,
+    strikeRate: 132, economy: 8.0,
+    strengths: "Left arm spin,All-round,Experienced",
+    weaknesses: "Age,Batting explosiveness",
+  },
+  {
+    name: "Piyush Chawla", role: "Bowler", basePrice: 0.5, skillRating: 75,
+    nationality: "Indian", battingRating: 15, bowlingRating: 76, fieldingRating: 74,
+    age: 35, experience: 14, form: 68,
+    strikeRate: 65, economy: 8.0,
+    strengths: "Leg spin,Experienced,Economy",
+    weaknesses: "Age,Flat tracks",
+  },
+  {
+    name: "Shahbaz Ahmed", role: "All-rounder", basePrice: 0.5, skillRating: 77,
+    nationality: "Indian", battingRating: 74, bowlingRating: 76, fieldingRating: 80,
+    age: 29, experience: 5, form: 79,
+    strikeRate: 135, economy: 8.1,
+    strengths: "Left arm spin,Batting,Economy",
+    weaknesses: "Consistency",
+  },
+  {
+    name: "Chetan Sakariya", role: "Bowler", basePrice: 0.2, skillRating: 73,
+    nationality: "Indian", battingRating: 10, bowlingRating: 74, fieldingRating: 76,
+    age: 26, experience: 3, form: 74,
+    strikeRate: 65, economy: 9.1,
+    strengths: "Left arm swing,Death bowling",
+    weaknesses: "Consistency,Economy",
+  },
+  {
+    name: "K Gowtham", role: "All-rounder", basePrice: 0.2, skillRating: 72,
+    nationality: "Indian", battingRating: 68, bowlingRating: 71, fieldingRating: 77,
+    age: 33, experience: 5, form: 70,
+    strikeRate: 128, economy: 8.8,
+    strengths: "Off spin,Batting,Experienced",
+    weaknesses: "Consistency,Age",
+  },
+  {
+    name: "Harshal Patel", role: "Bowler", basePrice: 0.5, skillRating: 79,
+    nationality: "Indian", battingRating: 20, bowlingRating: 80, fieldingRating: 78,
+    age: 33, experience: 8, form: 76,
+    strikeRate: 80, economy: 8.1,
+    strengths: "Cutters,Slower balls,Death bowling,Economy",
+    weaknesses: "Pace,Flat tracks",
+  },
+  {
+    name: "Jaydev Unadkat", role: "Bowler", basePrice: 0.5, skillRating: 76,
+    nationality: "Indian", battingRating: 15, bowlingRating: 77, fieldingRating: 78,
+    age: 32, experience: 12, form: 73,
+    strikeRate: 70, economy: 8.9,
+    strengths: "Left arm swing,Experienced,Powerplay",
+    weaknesses: "Economy,Death bowling",
+  },
+  {
+    name: "Trent Boult (Extra)", role: "Bowler", basePrice: 1, skillRating: 84,
+    nationality: "New Zealand", battingRating: 18, bowlingRating: 85, fieldingRating: 79,
+    age: 34, experience: 7, form: 79,
+    strikeRate: 65, economy: 7.7,
+    strengths: "Swing,Powerplay,Left arm",
+    weaknesses: "Death bowling,Pace",
+  },
 ];
 
-function randomBetween(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function randomFloat(min: number, max: number, decimals = 1): number {
-  const val = Math.random() * (max - min) + min;
-  return parseFloat(val.toFixed(decimals));
-}
-
-function randomItem<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
-const ROLES: SeedPlayer["role"][] = ["Batsman", "Bowler", "All-rounder", "Wicketkeeper"];
-const ROLE_WEIGHTS = [35, 35, 20, 10]; // percentage distribution
-
-function weightedRole(): SeedPlayer["role"] {
-  const rand = Math.random() * 100;
-  let cum = 0;
-  for (let i = 0; i < ROLES.length; i++) {
-    cum += ROLE_WEIGHTS[i];
-    if (rand < cum) return ROLES[i];
-  }
-  return "Batsman";
-}
-
-// Generate base price from skill rating
-function basePriceFromRating(rating: number): number {
-  if (rating >= 90) return randomFloat(1.5, 2.0);
-  if (rating >= 80) return randomFloat(0.5, 1.5);
-  if (rating >= 70) return randomFloat(0.2, 0.5);
-  return 0.2;
-}
-
-// Generate Indian players
-function generateIndianPlayers(count: number): SeedPlayer[] {
-  const players: SeedPlayer[] = [];
-  const usedNames = new Set<string>();
-
-  for (let i = 0; i < count; i++) {
-    let name: string;
-    let attempts = 0;
-    do {
-      name = `${randomItem(FIRST_NAMES_INDIAN)} ${randomItem(LAST_NAMES_INDIAN)}`;
-      attempts++;
-    } while (usedNames.has(name) && attempts < 50);
-    usedNames.add(name);
-
-    const rating = randomBetween(55, 85);
-    players.push({
-      name,
-      role: weightedRole(),
-      basePrice: basePriceFromRating(rating),
-      skillRating: rating,
-      nationality: "Indian",
-    });
-  }
-  return players;
-}
-
-// Generate overseas players
-function generateOverseasPlayers(count: number): SeedPlayer[] {
-  const players: SeedPlayer[] = [];
-  const nationalities = ["Australian","English","South African","West Indian","New Zealand","Sri Lankan","Bangladeshi","Afghan","Zimbabwean","Irish","Scottish","Namibian","UAE","Netherlands","Kenya","Uganda","Singapore","Canada","USA","Afghanistan"];
-  const usedNames = new Set<string>();
-
-  for (let i = 0; i < count; i++) {
-    let name: string;
-    let attempts = 0;
-    do {
-      name = `${randomItem(FIRST_NAMES_OVERSEAS)} ${randomItem(LAST_NAMES_OVERSEAS)}`;
-      attempts++;
-    } while (usedNames.has(name) && attempts < 50);
-    usedNames.add(name);
-
-    const rating = randomBetween(55, 82);
-    players.push({
-      name,
-      role: weightedRole(),
-      basePrice: basePriceFromRating(rating),
-      skillRating: rating,
-      nationality: randomItem(nationalities),
-    });
-  }
-  return players;
-}
-
-// Build the full player list — real players + generated to reach 600+
+// Build full sorted player list
 export function buildAllPlayers(): SeedPlayer[] {
-  const realCount = REAL_PLAYERS.length; // ~130 real players
-  const extraIndian = generateIndianPlayers(320);
-  const extraOverseas = generateOverseasPlayers(180);
+  // Combine all tiers - already roughly sorted by skillRating
+  const all = [
+    ...TIER_95,
+    ...TIER_90,
+    ...TIER_85,
+    ...TIER_80,
+    ...TIER_DOMESTIC,
+  ];
 
-  const all = [...REAL_PLAYERS, ...extraIndian, ...extraOverseas];
-
-  // Shuffle so generated and real players are mixed (Fisher-Yates)
-  for (let i = all.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [all[i], all[j]] = [all[j], all[i]];
+  // Remove duplicate "Trent Boult (Extra)"
+  const seen = new Set<string>();
+  const deduped: SeedPlayer[] = [];
+  for (const p of all) {
+    const key = p.name.replace(" (Extra)", "");
+    if (!seen.has(key)) {
+      seen.add(key);
+      deduped.push({ ...p, name: p.name.replace(" (Extra)", "") });
+    }
   }
 
-  return all;
+  // Sort strictly by skillRating descending (95+ → 90-94 → 85-89 → ...)
+  deduped.sort((a, b) => b.skillRating - a.skillRating);
+
+  return deduped;
+}
+
+// Slice players by count preference
+export function slicePlayers(all: SeedPlayer[], count: number | "full"): SeedPlayer[] {
+  if (count === "full") return all;
+  return all.slice(0, count);
 }

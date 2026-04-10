@@ -11,6 +11,7 @@ export interface TeamState {
   initialBudget: number;
   players: Player[];
   maxSquadSize: number;
+  targetPlayerIds?: number[]; // for extreme difficulty
 }
 
 export interface AuctionHistoryEntry {
@@ -26,7 +27,7 @@ export interface AuctionHistoryEntry {
 }
 
 export type AuctionStatus = "idle" | "bidding" | "sold" | "unsold" | "finished";
-export type Difficulty = "easy" | "medium" | "hard";
+export type Difficulty = "easy" | "medium" | "hard" | "extreme";
 
 export interface AuctionState {
   started: boolean;
@@ -44,6 +45,7 @@ export interface AuctionState {
   history: AuctionHistoryEntry[];
   historyIdCounter: number;
   timerInterval: ReturnType<typeof setInterval> | null;
+  playerCount: number | "full"; // how many players in this auction
 }
 
 // Singleton auction state
@@ -57,7 +59,7 @@ function createInitialState(): AuctionState {
     currentPlayer: null,
     currentBid: 0,
     currentBidder: null,
-    timer: 15,
+    timer: 5,
     teams: IPL_TEAMS.map((t) => ({
       ...t,
       budget: 100,
@@ -71,6 +73,7 @@ function createInitialState(): AuctionState {
     history: [],
     historyIdCounter: 1,
     timerInterval: null,
+    playerCount: "full",
   };
 }
 
@@ -83,7 +86,6 @@ export function setAuctionState(updates: Partial<AuctionState>): void {
 }
 
 export function resetAuctionState(): void {
-  // Clear any running timer
   if (auctionState.timerInterval) {
     clearInterval(auctionState.timerInterval);
   }
@@ -115,5 +117,6 @@ export function buildPublicState() {
     userTeamId: state.userTeamId,
     playerIndex: state.playerIndex,
     totalPlayers: state.players.length,
+    playerCount: state.playerCount,
   };
 }

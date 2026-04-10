@@ -22,4 +22,31 @@ export interface Player {
   sold: boolean;
   soldTo?: string | null;
   soldPrice?: number | null;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  battingRating: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  bowlingRating: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  fieldingRating: number;
+  age: number;
+  /** IPL seasons */
+  experience: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  form: number;
+  strikeRate: number;
+  economy: number;
+  strengths: string;
+  weaknesses: string;
 }

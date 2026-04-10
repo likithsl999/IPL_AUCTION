@@ -1,0 +1,21 @@
+CREATE TABLE "players" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"name" text NOT NULL,
+	"role" text NOT NULL,
+	"base_price" real NOT NULL,
+	"skill_rating" integer NOT NULL,
+	"nationality" text NOT NULL,
+	"sold" boolean DEFAULT false NOT NULL,
+	"sold_to" text,
+	"sold_price" real,
+	"batting_rating" integer DEFAULT 50 NOT NULL,
+	"bowling_rating" integer DEFAULT 50 NOT NULL,
+	"fielding_rating" integer DEFAULT 70 NOT NULL,
+	"age" integer DEFAULT 25 NOT NULL,
+	"experience" integer DEFAULT 3 NOT NULL,
+	"form" integer DEFAULT 70 NOT NULL,
+	"strike_rate" real DEFAULT 130 NOT NULL,
+	"economy" real DEFAULT 8 NOT NULL,
+	"strengths" text DEFAULT '' NOT NULL,
+	"weaknesses" text DEFAULT '' NOT NULL
+);
