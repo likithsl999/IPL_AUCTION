@@ -294,7 +294,8 @@ router.post("/ai-bid", (req, res) => {
       return res.json(buildPublicState());
     }
 
-    const { newBid, newBidder } = runAiBidRound(state);
+    const isPanicMode = state.timer <= 2 && state.currentBidder !== null;
+    const { newBid, newBidder } = runAiBidRound(state, isPanicMode);
 
     if (newBidder && newBid > state.currentBid) {
       setAuctionState({

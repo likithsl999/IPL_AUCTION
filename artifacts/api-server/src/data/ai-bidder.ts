@@ -227,8 +227,73 @@ export function decideAiBid(
   return { shouldBid: true, amount: newBid };
 }
 
+// PANIC MODE: when timer is very low, desperate teams may make a final push
+function panicBid(
+  team: TeamState,
+  player: Player,
+  currentBid: number,
+  currentBidder: string | null,
+  difficulty: Difficulty,
+): BidDecision {
+  const noBid = { shouldBid: false, amount: currentBid };
+
+  if (currentBidder === team.id) return noBid;
+  if (team.players.length >= team.maxSquadSize) return noBid;
+  if (team.budget < currentBid + 0.1) return noBid;
+
+  // Only panic for players worth competing for
+  if (player.skillRating < 80) return noBid;
+
+  const prio = TEAM_PRIORITIES[team.id];
+  if (!prio) return noBid;
+
+  const isPriority = player.role === prio.primary || player.role === prio.secondary;
+  if (!isPriority) return noBid;
+
+  // Panic probability: higher for better players and harder difficulty
+  const panicChance =
+    difficulty === "extreme" ? 0.75
+    : difficulty === "hard"   ? 0.55
+    : difficulty === "medium" ? 0.35
+    : 0.15;
+
+  if (Math.random() > panicChance) return noBid;
+
+  const increment = bidIncrement(currentBid, difficulty) * 1.5; // slightly bigger panic bid
+  const panicBidAmount = parseFloat((currentBid + increment).toFixed(2));
+
+  const maxBudgetSpend = team.budget * (difficulty === "extreme" ? 0.65 : 0.50);
+  if (panicBidAmount > maxBudgetSpend) return noBid;
+
+  return { shouldBid: true, amount: panicBidAmount };
+}
+
+// RIVALRY SYSTEM: certain team pairs compete more aggressively against each other
+const RIVALRIES: Record<string, string[]> = {
+  CSK: ["MI", "KKR"],
+  MI:  ["CSK", "RCB"],
+  RCB: ["MI", "CSK"],
+  KKR: ["CSK", "SRH"],
+  DC:  ["RCB", "LSG"],
+  SRH: ["KKR", "RR"],
+  PBKS: ["GT", "RR"],
+  RR:  ["SRH", "PBKS"],
+  GT:  ["MI", "PBKS"],
+  LSG: ["DC", "RR"],
+};
+
+function rivalryBonus(teamId: string, currentBidder: string | null, difficulty: Difficulty): number {
+  if (difficulty === "easy" || difficulty === "medium") return 0;
+  if (!currentBidder || currentBidder === teamId) return 0;
+  const rivals = RIVALRIES[teamId] ?? [];
+  return rivals.includes(currentBidder) ? (difficulty === "extreme" ? 0.20 : 0.10) : 0;
+}
+
 // Run AI bidding for all non-user teams
-export function runAiBidRound(state: AuctionState): { newBid: number; newBidder: string | null } {
+export function runAiBidRound(
+  state: AuctionState,
+  isPanicMode = false,
+): { newBid: number; newBidder: string | null } {
   if (!state.currentPlayer || state.status !== "bidding") {
     return { newBid: state.currentBid, newBidder: state.currentBidder };
   }
@@ -236,12 +301,32 @@ export function runAiBidRound(state: AuctionState): { newBid: number; newBidder:
   let currentBid = state.currentBid;
   let currentBidder = state.currentBidder;
 
-  // Shuffle teams — random bidding order each round (except extreme prioritizes)
-  const aiTeams = state.teams
+  // Shuffle teams — extreme mode: slightly prioritize teams with high need
+  let aiTeams = state.teams
     .filter((t) => t.id !== state.userTeamId)
     .sort(() => Math.random() - 0.5);
 
+  if (state.difficulty === "extreme") {
+    aiTeams = aiTeams.sort((a, b) => {
+      const needA = roleNeedScore(a)[state.currentPlayer!.role as keyof ReturnType<typeof roleNeedScore>] || 0;
+      const needB = roleNeedScore(b)[state.currentPlayer!.role as keyof ReturnType<typeof roleNeedScore>] || 0;
+      return needB - needA;
+    });
+  }
+
   for (const team of aiTeams) {
+    // In panic mode (timer ≤ 2) — try panic bid first
+    if (isPanicMode) {
+      const panic = panicBid(team, state.currentPlayer, currentBid, currentBidder, state.difficulty);
+      if (panic.shouldBid) {
+        currentBid = panic.amount;
+        currentBidder = team.id;
+        continue;
+      }
+    }
+
+    // Normal bid decision with rivalry modifier
+    const rivalBonus = rivalryBonus(team.id, currentBidder, state.difficulty);
     const decision = decideAiBid(
       team,
       state.currentPlayer,
@@ -252,7 +337,19 @@ export function runAiBidRound(state: AuctionState): { newBid: number; newBidder:
       state,
     );
 
-    if (decision.shouldBid) {
+    if (!decision.shouldBid && rivalBonus > 0) {
+      // Rivalry boost: re-roll with slightly higher probability
+      const rollAgain = Math.random() < rivalBonus;
+      if (rollAgain) {
+        const inc = bidIncrement(currentBid, state.difficulty);
+        const rivalBid = parseFloat((currentBid + inc).toFixed(2));
+        const maxWilling = team.budget * 0.55;
+        if (rivalBid <= maxWilling && rivalBid > currentBid) {
+          currentBid = rivalBid;
+          currentBidder = team.id;
+        }
+      }
+    } else if (decision.shouldBid) {
       currentBid = decision.amount;
       currentBidder = team.id;
     }
