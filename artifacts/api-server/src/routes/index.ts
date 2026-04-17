@@ -3,6 +3,7 @@ import healthRouter from "./health";
 import playersRouter from "./players";
 import teamsRouter from "./teams";
 import auctionRouter from "./auction";
+import careerRouter from "./career";
 
 const router: IRouter = Router();
 
@@ -10,5 +11,6 @@ router.use(healthRouter);
 router.use("/players", playersRouter);
 router.use("/teams", teamsRouter);
 router.use("/auction", auctionRouter);
+router.use("/career", careerRouter);
 
 export default router;

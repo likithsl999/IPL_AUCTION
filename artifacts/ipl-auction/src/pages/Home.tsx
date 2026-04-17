@@ -4,7 +4,7 @@ import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Loader2, Zap, Shield, Swords, Trophy, Settings, ChevronRight } from "lucide-react";
+import { Loader2, Zap, Shield, Swords, Trophy, Settings, ChevronRight, Volume2 } from "lucide-react";
 
 const DIFFICULTIES = [
   {
@@ -50,8 +50,9 @@ const DIFFICULTIES = [
 ];
 
 const PLAYER_COUNT_OPTIONS = [
-  { value: 50,   label: "50",    desc: "Top stars only" },
-  { value: 100,  label: "100",   desc: "Elite pool" },
+  { value: 100,  label: "100",   desc: "Top stars" },
+  { value: 200,  label: "200",   desc: "Elite pool" },
+  { value: 300,  label: "300",   desc: "Extended" },
   { value: 0,    label: "FULL",  desc: "All players" },
 ];
 
@@ -63,7 +64,7 @@ export default function Home() {
   const [selectedTeamId, setSelectedTeamId] = React.useState<string | null>(null);
   const [budget, setBudget] = React.useState<number>(100);
   const [difficulty, setDifficulty] = React.useState<"easy" | "medium" | "hard" | "extreme">("medium");
-  const [playerCount, setPlayerCount] = React.useState<number>(0); // 0 = full
+  const [playerCount, setPlayerCount] = React.useState<number>(0);
 
   const handleStart = () => {
     if (!selectedTeamId) return;
@@ -91,7 +92,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-white flex flex-col">
       {/* Header */}
       <div className="border-b border-white/5 bg-black/80 backdrop-blur-sm px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
@@ -99,18 +100,19 @@ export default function Home() {
             <h1 className="text-3xl font-black uppercase tracking-tighter bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
               IPL AUCTION
             </h1>
-            <p className="text-xs text-white/40 uppercase tracking-widest mt-0.5">2025 Mega Auction Simulator</p>
+            <p className="text-xs text-white/30 uppercase tracking-widest mt-0.5">2026 Mega Auction Simulator</p>
           </div>
-          <div className="flex items-center gap-2 text-white/30 text-xs font-mono">
+          <div className="flex items-center gap-3 text-white/20 text-xs font-mono">
+            <Volume2 className="h-3.5 w-3.5" />
             <Settings className="h-4 w-4" />
-            Setup
+            <span>Setup</span>
           </div>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto px-4 py-8 flex-1 w-full">
         <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
-          {/* LEFT — Franchise Selection */}
+          {/* LEFT — Franchise Selection + AI Difficulty */}
           <div className="lg:col-span-2 space-y-6">
             <div>
               <h2 className="text-xs uppercase tracking-widest text-white/40 font-bold mb-4">
@@ -186,7 +188,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* RIGHT — Settings */}
+          {/* RIGHT — Settings Panel */}
           <div className="space-y-5">
             {/* Budget */}
             <Card className="border-white/5 bg-white/2 text-white">
@@ -241,6 +243,15 @@ export default function Home() {
               </CardContent>
             </Card>
 
+            {/* Auction Speed Info */}
+            <div className="flex items-center gap-3 px-4 py-3 border border-green-500/20 rounded-xl bg-green-500/5">
+              <Zap className="h-4 w-4 text-green-400 flex-shrink-0" />
+              <div>
+                <div className="text-xs font-bold text-green-400">FAST MODE</div>
+                <div className="text-[10px] text-white/30">5s timer • 3s reset on bid</div>
+              </div>
+            </div>
+
             {/* Start Button */}
             <Button
               size="lg"
@@ -264,6 +275,18 @@ export default function Home() {
               <p className="text-center text-xs text-white/20">Select a franchise to continue</p>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="border-t border-white/5 py-3">
+        <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
+          <span className="text-[10px] text-white/15 uppercase tracking-widest">
+            IPL Auction Simulator 2026
+          </span>
+          <span className="text-[10px] text-white/15 uppercase tracking-widest">
+            Developed by Likith
+          </span>
         </div>
       </div>
     </div>

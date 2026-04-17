@@ -15,7 +15,41 @@ import {
 } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Loader2, Trophy, Users, Wallet, ChevronRight, RotateCcw, SkipForward, LayoutGrid } from "lucide-react";
+import { Loader2, Trophy, Users, Wallet, ChevronRight, RotateCcw, SkipForward, LayoutGrid, Zap } from "lucide-react";
+
+// ─── Web Audio Sound Effects ─────────────────────────────────────────────────
+function playTone(freq: number, duration: number, volume = 0.2, type: OscillatorType = "sine") {
+  try {
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = type;
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(volume, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + duration + 0.05);
+    setTimeout(() => ctx.close(), (duration + 0.2) * 1000);
+  } catch { /* Web Audio not available */ }
+}
+
+function playBidSound() {
+  playTone(880, 0.12, 0.18, "sine");
+  setTimeout(() => playTone(1100, 0.08, 0.1, "sine"), 80);
+}
+
+function playSoldSound() {
+  [660, 550, 440].forEach((freq, i) => {
+    setTimeout(() => playTone(freq, 0.25, 0.3, "triangle"), i * 100);
+  });
+  setTimeout(() => playTone(880, 0.4, 0.25, "sine"), 350);
+}
+
+function playTimerWarning(isLastSecond: boolean) {
+  playTone(isLastSecond ? 1200 : 900, 0.08, 0.15, "square");
+}
 
 const ROLE_COLORS: Record<string, { bg: string; text: string; border: string; glow: string }> = {
   Batsman:      { bg: "bg-blue-500/10",   text: "text-blue-300",   border: "border-blue-500/30",   glow: "#3b82f6" },
@@ -190,6 +224,10 @@ export default function Auction() {
   const queryClient = useQueryClient();
   const aiIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [showTeams, setShowTeams] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const prevBidRef = useRef<number>(0);
+  const prevStatusRef = useRef<string>("");
+  const prevTimerRef = useRef<number>(99);
 
   const { data: state, isLoading } = useGetAuctionState({
     query: {
@@ -226,6 +264,32 @@ export default function Auction() {
       if (aiIntervalRef.current) clearInterval(aiIntervalRef.current);
     };
   }, [state?.status, state?.started]);
+
+  // Sound effects: play when bid changes, sold, or timer warns
+  useEffect(() => {
+    if (!soundEnabled || !state) return;
+    const bid = state.currentBid ?? 0;
+    const status = state.status ?? "";
+    const timer = state.timer ?? 0;
+
+    // New bid placed
+    if (bid > prevBidRef.current && bid > 0 && status === "bidding") {
+      playBidSound();
+    }
+    // Sold event
+    if (status === "sold" && prevStatusRef.current !== "sold") {
+      playSoldSound();
+    }
+    // Timer warning at 2s and 1s
+    if (prevTimerRef.current !== timer) {
+      if (timer === 2 && prevTimerRef.current > 2) playTimerWarning(false);
+      if (timer === 1 && prevTimerRef.current > 1) playTimerWarning(true);
+    }
+
+    prevBidRef.current = bid;
+    prevStatusRef.current = status;
+    prevTimerRef.current = timer;
+  }, [state?.currentBid, state?.status, state?.timer, soundEnabled]);
 
   const handleBid = (increment: number) => {
     if (!state || !state.userTeamId || !state.currentPlayer) return;
@@ -314,7 +378,7 @@ export default function Auction() {
 
       {/* FINISHED STATE */}
       {isFinished && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 backdrop-blur-sm gap-6">
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 backdrop-blur-sm gap-6 px-4">
           <Trophy className="h-20 w-20 text-yellow-400" style={{ filter: "drop-shadow(0 0 20px rgba(251,191,36,0.6))" }} />
           <h2 className="text-5xl font-black uppercase tracking-tighter bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
             Auction Complete
@@ -327,9 +391,20 @@ export default function Auction() {
               </p>
             )}
           </div>
-          <div className="flex gap-3">
-            <Button onClick={() => setLocation("/squad")} className="bg-yellow-400 text-black font-bold">
-              View My Squad
+          {/* Season simulation CTA */}
+          <div className="border border-yellow-500/20 rounded-2xl p-5 text-center bg-yellow-500/5 max-w-sm">
+            <div className="text-yellow-400 font-black text-lg mb-1">Ready to play the season?</div>
+            <div className="text-white/40 text-xs mb-4">Simulate all IPL matches, see standings & find the champion</div>
+            <Button
+              onClick={() => setLocation("/season")}
+              className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-black rounded-xl hover:shadow-[0_0_20px_rgba(251,191,36,0.4)]"
+            >
+              <Zap className="h-4 w-4 mr-2" /> Simulate Season 2026
+            </Button>
+          </div>
+          <div className="flex flex-wrap gap-3 justify-center">
+            <Button onClick={() => setLocation("/squad")} variant="outline" className="border-white/10 text-white">
+              <Users className="h-3 w-3 mr-1" /> My Squad
             </Button>
             <Button onClick={() => setLocation("/teams")} variant="outline" className="border-white/10 text-white">
               All Teams
@@ -347,7 +422,10 @@ export default function Auction() {
       {/* TOP BAR */}
       <div className="border-b border-white/5 px-4 py-2 flex items-center justify-between bg-black/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="flex items-center gap-4">
-          <span className="text-xs font-black text-white/30 uppercase tracking-widest">IPL AUCTION</span>
+          <div>
+            <span className="text-xs font-black text-white/30 uppercase tracking-widest">IPL AUCTION</span>
+            <span className="text-[9px] text-yellow-400/50 ml-1.5 font-bold">2026</span>
+          </div>
           <div className="flex items-center gap-2">
             <div className="w-32 h-1 bg-white/5 rounded-full overflow-hidden">
               <div
@@ -361,6 +439,14 @@ export default function Auction() {
           </div>
         </div>
         <div className="flex items-center gap-1">
+          {/* Sound toggle */}
+          <button
+            onClick={() => setSoundEnabled(s => !s)}
+            title={soundEnabled ? "Mute sounds" : "Enable sounds"}
+            className={`px-2 py-1 rounded text-[10px] font-bold transition-all ${soundEnabled ? "text-yellow-400/60 hover:text-yellow-400" : "text-white/20 hover:text-white/40"}`}
+          >
+            {soundEnabled ? "🔊" : "🔇"}
+          </button>
           <Button variant="ghost" size="sm" className="text-xs text-white/40 hover:text-white" onClick={() => setLocation("/squad")}>
             <Users className="h-3 w-3 mr-1" /> My Squad
           </Button>
