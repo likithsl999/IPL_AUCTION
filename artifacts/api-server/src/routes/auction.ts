@@ -33,8 +33,10 @@ router.post("/start", async (req, res) => {
     const body = StartAuctionBody.parse(req.body);
     const { userTeamId, budget, difficulty, playerCount } = body as any;
 
-    const teamConfig = IPL_TEAMS.find((t) => t.id === userTeamId);
-    if (!teamConfig) {
+    // WATCH_MODE: all 10 teams are AI, no user team
+    const isWatchMode = userTeamId === "WATCH_MODE";
+    const teamConfig = isWatchMode ? IPL_TEAMS[0] : IPL_TEAMS.find((t) => t.id === userTeamId);
+    if (!isWatchMode && !teamConfig) {
       return res.status(400).json({ error: "Invalid team ID" });
     }
 

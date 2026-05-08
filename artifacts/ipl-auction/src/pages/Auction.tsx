@@ -14,7 +14,7 @@ import {
   type Player,
 } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
-import { Loader2, Trophy, Users, Wallet, ChevronRight, RotateCcw, SkipForward, LayoutGrid, Zap, Volume2, VolumeX } from "lucide-react";
+import { Loader2, Trophy, Users, Wallet, ChevronRight, RotateCcw, SkipForward, LayoutGrid, Zap, Volume2, VolumeX, BarChart3 } from "lucide-react";
 
 // ─── Web Audio Sound Effects ──────────────────────────────────────────────────
 function playTone(freq: number, duration: number, volume = 0.2, type: OscillatorType = "sine") {
@@ -534,6 +534,9 @@ export default function Auction() {
             <Button onClick={() => setLocation("/teams")} variant="outline" className="border-white/10 text-white text-sm">
               All Teams
             </Button>
+            <Button onClick={() => setLocation("/analytics")} variant="outline" className="border-cyan-500/20 text-cyan-400 text-sm hover:bg-cyan-500/10">
+              <BarChart3 className="h-3 w-3 mr-1" /> Analytics
+            </Button>
             <Button onClick={() => setLocation("/history")} variant="outline" className="border-white/10 text-white text-sm">
               History
             </Button>
@@ -577,6 +580,9 @@ export default function Auction() {
             </Button>
             <Button variant="ghost" size="sm" className="text-[10px] text-white/30 hover:text-white px-2" onClick={() => setLocation("/teams")}>
               <LayoutGrid className="h-3 w-3 mr-1" /> Teams
+            </Button>
+            <Button variant="ghost" size="sm" className="text-[10px] text-cyan-400/50 hover:text-cyan-400 px-2" onClick={() => setLocation("/analytics")}>
+              <BarChart3 className="h-3 w-3 mr-1" /> Stats
             </Button>
             <Button variant="ghost" size="sm" className="text-[10px] text-white/30 hover:text-white px-2" onClick={() => setLocation("/history")}>
               History

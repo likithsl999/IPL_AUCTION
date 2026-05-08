@@ -36,7 +36,7 @@ Premium full-stack IPL Cricket Auction Simulator 2026 — real-time bidding with
 - Pool options: 100 / 200 / 300 / FULL
 
 ### 2. Premium Auction UI (3-Column Layout)
-- **Top bar**: Logo + progress + all 10 team budget chips (scrollable, live, color-coded)
+- **Top bar**: Logo + progress + all 10 team budget chips (scrollable, live, color-coded) + Stats nav link
 - **Left panel**: Team list with squad counts, role breakdowns (BAT/BWL/AR/WK), budget bars
 - **Center**: Enhanced player card + current bid display + live commentary feed
 - **Right panel**: Circular SVG timer (green→yellow→red), large glowing BID button, increment buttons, Pass/Sell
@@ -65,48 +65,123 @@ Premium full-stack IPL Cricket Auction Simulator 2026 — real-time bidding with
 - Sound effects: bid ping, sold fanfare, timer warnings (at 2s and 1s)
 - 🔊/🔇 mute toggle in top bar
 
-### 6. Career / Season Mode
-- Multi-season system — simulate after auction finishes
-- 45 round-robin IPL league matches with scorecards (runs, wickets, NRR)
-- 4 playoffs: Qualifier 1 → Eliminator → Qualifier 2 → Final
-- Full standings table: W/L/NRR/points
-- Top run-scorer and wicket-taker per season (aggregated from squad stats + match fallbacks)
-- Champion banner + Next Season flow
-- Career API: `/api/career/state`, `/api/career/simulate`, `/api/career/next-season`, `/api/career/reset`
+### 6. 🏟️ Stadium System (NEW)
+- 10 real IPL venues: Wankhede, Chinnaswamy, Chepauk, Eden Gardens, Kotla, Uppal, Mohali, SMS, NM Stadium, Ekana
+- Each stadium: pitch type (Batting/Pace/Spin/Balanced), boundary size, capacity, dew factor
+- Home team stadium used during league phase; neutral venues for playoffs
+- Stadium highlights shown in Season analytics
+- File: `artifacts/api-server/src/data/stadiums.ts`
 
-### 7. Loading Screen (2026 Splash)
+### 7. 🌦️ Weather Engine (NEW)
+- Conditions: Sunny, Cloudy, Humid, Overcast, Heavy Dew
+- Weather modifiers: batting bonus/penalty, swing bonus, spin bonus, chasing advantage
+- Heavy Dew gives chasing team +12 run advantage; Overcast boosts swing +25%
+- Injury risk varies by conditions
+- Weather shown on every match card in Season page
+
+### 8. 🧬 Player Growth System (NEW)
+- Age-based progression applied after each season via `/api/career/next-season`
+- Under 22: +1 to +3 rating growth; 23–27: ±1-2 form fluctuation; 28–32: slight decline; 33+: faster decline
+- Growth events logged and shown in career state
+- File: `artifacts/api-server/src/routes/career.ts`
+
+### 9. 🏆 Records & Hall of Fame (NEW)
+- Multi-season records tracked: Orange Cap, Purple Cap, Most Sixes, Best Bowling, Man of Series, Champions
+- `/api/career/records` returns full history across all seasons
+- Records tab in Analytics dashboard shows all-time leaders
+- File: `artifacts/api-server/src/data/career-state.ts`
+
+### 10. 🌟 Youth Academy (NEW)
+- 6 prospects generated after each season with: name, age (17–22), role, nationality, potential, current rating, trait
+- Potential ceiling 72–94; current rating 55–80% of potential
+- `/api/career/youth` returns current prospects
+- Youth tab in Analytics dashboard shows all prospects with potential bars
+- File: `artifacts/api-server/src/data/career-state.ts`
+
+### 11. 💰 Finance System (NEW)
+- Champion earns ₹50Cr prize; playoff teams ₹20–30Cr; others ₹10Cr
+- Sponsor income scales with standings points
+- Operating expenses (salaries, staff) deducted
+- Multi-season profit/loss tracking via `/api/career/finance`
+- Finance tab in Analytics dashboard
+
+### 12. 🤝 Team Chemistry System (NEW)
+- Calculated from national grouping ratios and star player counts
+- Chemistry bonus: +3% performance for 75+ chemistry, +1% for 60+
+- Chemistry rankings shown in Season Awards tab
+- All 10 teams ranked in Season page
+
+### 13. 🎙️ Dynamic Commentary Engine (NEW)
+- 6-7 lines of commentary per match: venue, pitch report, batting highlight, bowling highlight, crowd, situation, weather note
+- Commentary shows on match cards in Season page (click to expand)
+- Commentary highlights shown in Season "Venues" tab
+- Templates: 10 batting lines, 9 bowling lines, 7 crowd lines, 8 situation lines
+
+### 14. 🏥 Injury System (NEW)
+- Random injury events during matches (risk varies by weather)
+- Injury types: hamstring, knee, shoulder, back, side strain, ankle, calf
+- Injury report shown in Season "Venues" tab
+- Dew/sunny conditions = lowest risk; Humid = higher risk
+
+### 15. 📊 Analytics Dashboard (NEW)
+- New `/analytics` page with 4 tabs: Auction, Records, Youth, Finance
+- **Auction tab**: team avg rating ranking, spend by role, best value picks, biggest bids
+- **Records tab**: Hall of Fame, Orange/Purple Cap history, Most Sixes, Champion history
+- **Youth tab**: all 6 prospects with potential bars and growth ceiling labels
+- **Finance tab**: season-by-season income/expenses with net profit
+- File: `artifacts/ipl-auction/src/pages/Analytics.tsx`
+
+### 16. 🕹️ Game Modes (NEW)
+- **Standard Auction**: Pick your team, set budget, bid against AI
+- **AI Watch Mode**: All 10 teams are AI — observe the full auction
+- **Challenge Mode**: 3 variants — Low Budget (₹60Cr), Youth Focus (₹80Cr), Underdog (₹70Cr + Extreme AI)
+- Mode selector on Home screen
+
+### 17. 💾 Save System (NEW)
+- 3 localStorage save slots on Home screen
+- Save stores: team choice, budget, difficulty, player pool, timestamp
+- Load any saved config instantly; overwrite slots freely
+- Persist your favorite setup across browser sessions
+
+### 18. Career / Season Mode (Enhanced)
+- 5 tabs: Standings, Playoffs, Matches, Awards, Venues
+- **Awards tab**: Orange Cap, Purple Cap, Six Machine, MoTS, Best Bowling, Chemistry Rankings
+- **Venues tab**: Stadium highlights, injury report, match commentary samples
+- Match cards show venue name + weather condition
+- Navigate to Analytics from Season page directly
+
+### 19. Loading Screen (2026 Splash)
 - Animated cricket bat/ball icon with golden glow
 - "IPL AUCTION SIMULATOR" + giant "2026" in gold-to-red gradient
 - "Developed by Likith" credit
 - Auto-dismisses after 3.2 seconds
 
-### 8. User Setup Screen
-- Select any of 10 official IPL teams
-- Set budget: ₹50 Cr – ₹200 Cr
-- Choose difficulty: EASY / MEDIUM / HARD / EXTREME
-- Choose player pool: 100 / 200 / 300 / FULL
-- FAST MODE default (5s timer)
+## New API Endpoints
 
-### 9. Full Team Visibility
-- Teams page: all 10 franchises with full squad lists, remaining budget, role breakdown
-- Squad page: user's own squad with stats cards
-- History page: full auction log (sold/unsold events)
-- All Teams Dashboard accessible during auction
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/career/records` | GET | Multi-season hall of fame records |
+| `/api/career/youth` | GET | Youth academy prospects |
+| `/api/career/finance` | GET | Season-by-season franchise finances |
+| `/api/career/next-season` | POST | Advance season + apply player growth + generate youth |
 
 ## Key Files
 
 | File | Purpose |
 |------|---------|
 | `artifacts/ipl-auction/src/pages/Auction.tsx` | Main auction UI (3-column premium layout) |
-| `artifacts/ipl-auction/src/pages/Home.tsx` | Setup screen with 2026 branding |
-| `artifacts/ipl-auction/src/pages/Season.tsx` | Career/season results page |
+| `artifacts/ipl-auction/src/pages/Home.tsx` | Setup screen — game modes, save/load, AI watch |
+| `artifacts/ipl-auction/src/pages/Season.tsx` | Career/season results — 5 tabs including Awards + Venues |
+| `artifacts/ipl-auction/src/pages/Analytics.tsx` | Analytics dashboard — 4 tabs |
 | `artifacts/ipl-auction/src/components/LoadingScreen.tsx` | 2026 animated splash screen |
+| `artifacts/api-server/src/data/stadiums.ts` | 10 IPL stadiums + weather system |
 | `artifacts/api-server/src/data/players-seed.ts` | 252+ real players (7 tiers) |
 | `artifacts/api-server/src/data/ai-bidder.ts` | AI logic (panic mode, rivalry, squad analysis) |
+| `artifacts/api-server/src/data/match-engine.ts` | Season simulation + stadiums + weather + chemistry + commentary |
 | `artifacts/api-server/src/data/match-engine.ts` | Season simulation (45 matches + 4 playoffs) |
-| `artifacts/api-server/src/data/career-state.ts` | Career singleton state |
-| `artifacts/api-server/src/routes/career.ts` | Career API endpoints |
-| `artifacts/api-server/src/routes/auction.ts` | Auction engine (timer, bid, AI-bid, next) |
+| `artifacts/api-server/src/data/career-state.ts` | Career singleton: records, youth, finance, growth |
+| `artifacts/api-server/src/routes/career.ts` | Career API endpoints (all 6) |
+| `artifacts/api-server/src/routes/auction.ts` | Auction engine + Watch Mode support |
 
 ## User Preferences
 
