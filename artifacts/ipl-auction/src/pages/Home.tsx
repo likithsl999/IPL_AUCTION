@@ -4,9 +4,11 @@ import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Loader2, Zap, Shield, Swords, Trophy, ChevronRight,
   Eye, Target, BarChart3, BookOpen, Save, Upload,
+  User, Globe, Medal,
 } from "lucide-react";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -62,6 +64,7 @@ function persistSaves(saves: (SaveSlot | null)[]) {
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function Home() {
   const [, setLocation] = useLocation();
+  const { user, isAuthenticated } = useAuth();
   const { data: teams, isLoading: isLoadingTeams } = useGetTeams();
   const startAuction = useStartAuction();
 
@@ -158,7 +161,7 @@ export default function Home() {
             </h1>
             <p className="text-xs text-white/30 uppercase tracking-widest mt-0.5">2026 Mega Auction Simulator</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <button onClick={() => setLocation("/analytics")}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-cyan-400/60 hover:text-cyan-400 border border-cyan-500/10 hover:border-cyan-500/30 transition-all">
               <BarChart3 className="h-3 w-3" /> Analytics
@@ -167,10 +170,29 @@ export default function Home() {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-purple-400/60 hover:text-purple-400 border border-purple-500/10 hover:border-purple-500/30 transition-all">
               <BookOpen className="h-3 w-3" /> Career
             </button>
+            <button onClick={() => setLocation("/leaderboard")}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-yellow-400/60 hover:text-yellow-400 border border-yellow-500/10 hover:border-yellow-500/30 transition-all">
+              <Medal className="h-3 w-3" /> Ranks
+            </button>
+            <button onClick={() => setLocation("/multiplayer")}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-green-400/60 hover:text-green-400 border border-green-500/10 hover:border-green-500/30 transition-all">
+              <Globe className="h-3 w-3" /> Multiplayer
+            </button>
             <button onClick={() => setShowSaves(s => !s)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-white/40 hover:text-white border border-white/10 hover:border-white/20 transition-all">
               <Save className="h-3 w-3" /> Saves
             </button>
+            {isAuthenticated ? (
+              <button onClick={() => setLocation("/profile")}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-orange-400/80 hover:text-orange-400 border border-orange-500/20 hover:border-orange-500/40 transition-all bg-orange-500/5">
+                <User className="h-3 w-3" /> {user?.username}
+              </button>
+            ) : (
+              <button onClick={() => setLocation("/login")}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-yellow-400 text-black font-bold hover:bg-yellow-300 transition-all">
+                <User className="h-3 w-3" /> Sign In
+              </button>
+            )}
           </div>
         </div>
       </div>
