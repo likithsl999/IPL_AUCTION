@@ -134,24 +134,26 @@ export default function Analytics() {
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Header */}
-      <div className="border-b border-white/5 px-4 py-3 flex items-center gap-3 bg-black/90 sticky top-0 z-10 backdrop-blur">
-        <Button variant="ghost" size="sm" className="text-white/40 hover:text-white"
-          onClick={() => setLocation("/auction")}>
-          <ArrowLeft className="h-4 w-4 mr-1" /> Back
-        </Button>
-        <div className="flex items-center gap-2">
-          <BarChart3 className="h-4 w-4 text-cyan-400" />
-          <h1 className="text-sm font-bold tracking-wider text-white/90">ANALYTICS DASHBOARD</h1>
+      <div className="border-b border-white/5 bg-[#0a0a0a] sticky top-0 z-10">
+        <div className="px-4 py-2.5 flex items-center gap-3">
+          <Button variant="ghost" size="sm" className="text-white/40 hover:text-white shrink-0 h-7 px-2"
+            onClick={() => setLocation("/auction")}>
+            <ArrowLeft className="h-3.5 w-3.5 mr-1" /> Back
+          </Button>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <BarChart3 className="h-3.5 w-3.5 text-cyan-400 shrink-0" />
+            <h1 className="text-xs font-bold tracking-wider text-white/80 truncate">ANALYTICS</h1>
+          </div>
         </div>
-        <div className="ml-auto flex gap-2">
+        {/* Tab bar — full width, scrollable on mobile */}
+        <div className="flex gap-1 px-4 pb-2 overflow-x-auto scrollbar-none">
           {tabs.map(tab => (
-            <button key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all
-                ${activeTab === tab.id
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-medium transition-colors whitespace-nowrap shrink-0 ${
+                activeTab === tab.id
                   ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
-                  : "text-white/40 hover:text-white/70"}`}
-            >
+                  : "text-white/40 hover:text-white/70 border border-transparent"
+              }`}>
               <tab.icon className="h-3 w-3" /> {tab.label}
             </button>
           ))}

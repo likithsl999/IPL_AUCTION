@@ -153,43 +153,40 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
       {/* Header */}
-      <div className="border-b border-white/5 bg-black/80 backdrop-blur-sm px-6 py-4">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-black uppercase tracking-tighter bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+      <div className="border-b border-white/5 bg-[#0a0a0a] px-4 py-3">
+        <div className="max-w-6xl mx-auto flex items-center justify-between gap-3">
+          <div className="shrink-0">
+            <h1 className="text-2xl font-black uppercase tracking-tighter bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent leading-none">
               IPL AUCTION
             </h1>
-            <p className="text-xs text-white/30 uppercase tracking-widest mt-0.5">2026 Mega Auction Simulator</p>
+            <p className="text-[9px] text-white/25 uppercase tracking-widest mt-0.5">2026 Mega Auction Simulator</p>
           </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <button onClick={() => setLocation("/analytics")}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-cyan-400/60 hover:text-cyan-400 border border-cyan-500/10 hover:border-cyan-500/30 transition-all">
-              <BarChart3 className="h-3 w-3" /> Analytics
-            </button>
-            <button onClick={() => setLocation("/season")}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-purple-400/60 hover:text-purple-400 border border-purple-500/10 hover:border-purple-500/30 transition-all">
-              <BookOpen className="h-3 w-3" /> Career
-            </button>
-            <button onClick={() => setLocation("/leaderboard")}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-yellow-400/60 hover:text-yellow-400 border border-yellow-500/10 hover:border-yellow-500/30 transition-all">
-              <Medal className="h-3 w-3" /> Ranks
-            </button>
-            <button onClick={() => setLocation("/multiplayer")}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-green-400/60 hover:text-green-400 border border-green-500/10 hover:border-green-500/30 transition-all">
-              <Globe className="h-3 w-3" /> Multiplayer
-            </button>
+          {/* Scrollable nav row — never wraps, scrolls on mobile */}
+          <div className="flex items-center gap-1 overflow-x-auto scrollbar-none">
+            {[
+              { label: "Analytics", icon: BarChart3, path: "/analytics", cls: "text-cyan-400/60 hover:text-cyan-400 border-cyan-500/10 hover:border-cyan-500/30" },
+              { label: "Career",    icon: BookOpen,  path: "/season",    cls: "text-purple-400/60 hover:text-purple-400 border-purple-500/10 hover:border-purple-500/30" },
+              { label: "Ranks",     icon: Medal,     path: "/leaderboard",cls: "text-yellow-400/60 hover:text-yellow-400 border-yellow-500/10 hover:border-yellow-500/30" },
+              { label: "Multi",     icon: Globe,     path: "/multiplayer",cls: "text-emerald-400/60 hover:text-emerald-400 border-emerald-500/10 hover:border-emerald-500/30" },
+            ].map(({ label, icon: Icon, path, cls }) => (
+              <button key={path} onClick={() => setLocation(path)}
+                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] border whitespace-nowrap transition-colors shrink-0 ${cls}`}>
+                <Icon className="h-3 w-3" /><span className="hidden sm:inline">{label}</span>
+              </button>
+            ))}
             <button onClick={() => setShowSaves(s => !s)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-white/40 hover:text-white border border-white/10 hover:border-white/20 transition-all">
-              <Save className="h-3 w-3" /> Saves
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] text-white/40 hover:text-white border border-white/10 hover:border-white/20 transition-colors shrink-0 whitespace-nowrap">
+              <Save className="h-3 w-3" /><span className="hidden sm:inline">Saves</span>
             </button>
             {isAuthenticated ? (
               <button onClick={() => setLocation("/profile")}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-orange-400/80 hover:text-orange-400 border border-orange-500/20 hover:border-orange-500/40 transition-all bg-orange-500/5">
-                <User className="h-3 w-3" /> {user?.username}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] text-orange-400/80 hover:text-orange-400 border border-orange-500/20 transition-colors shrink-0 bg-orange-500/5 whitespace-nowrap max-w-[100px] overflow-hidden">
+                <User className="h-3 w-3 shrink-0" />
+                <span className="truncate">{user?.username}</span>
               </button>
             ) : (
               <button onClick={() => setLocation("/login")}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-yellow-400 text-black font-bold hover:bg-yellow-300 transition-all">
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] bg-yellow-400 text-black font-bold hover:bg-yellow-300 transition-colors shrink-0 whitespace-nowrap">
                 <User className="h-3 w-3" /> Sign In
               </button>
             )}
@@ -205,7 +202,7 @@ export default function Home() {
               <Save className="h-3 w-3 text-white/40" />
               <span className="text-xs uppercase tracking-wider text-white/40">Save Slots</span>
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {saves.map((save, i) => (
                 <div key={i} className="border border-white/10 rounded-xl p-3 bg-white/3">
                   {save ? (
@@ -247,20 +244,20 @@ export default function Home() {
         {/* ── GAME MODE SELECTOR ─────────────────────────────────────────── */}
         <div className="mb-6">
           <h2 className="text-xs uppercase tracking-widest text-white/40 font-bold mb-3">Game Mode</h2>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             {[
-              { id: "standard",  label: "Standard Auction",   desc: "Pick your team and bid",              icon: Trophy,  color: "text-yellow-400", border: "border-yellow-500/40", bg: "bg-yellow-500/5"  },
-              { id: "watch",     label: "AI Watch Mode",      desc: "Sit back — all 10 teams are AI",      icon: Eye,     color: "text-cyan-400",   border: "border-cyan-500/40",   bg: "bg-cyan-500/5"    },
-              { id: "challenge", label: "Challenge Mode",     desc: "Tough constraints, maximum glory",    icon: Target,  color: "text-red-400",    border: "border-red-500/40",    bg: "bg-red-500/5"     },
+              { id: "standard",  label: "Standard Auction", desc: "Pick your team and bid",           icon: Trophy,  color: "text-yellow-400", border: "border-yellow-500/40", bg: "bg-yellow-500/5"  },
+              { id: "watch",     label: "AI Watch Mode",    desc: "Sit back — all 10 teams are AI",   icon: Eye,     color: "text-cyan-400",   border: "border-cyan-500/40",   bg: "bg-cyan-500/5"    },
+              { id: "challenge", label: "Challenge Mode",   desc: "Tough constraints, maximum glory", icon: Target,  color: "text-red-400",    border: "border-red-500/40",    bg: "bg-red-500/5"     },
             ].map(m => (
               <button key={m.id} onClick={() => setGameMode(m.id as GameMode)}
-                className={`flex items-start gap-3 p-4 rounded-xl border text-left transition-all ${
+                className={`flex items-center sm:items-start gap-3 p-3 rounded-xl border text-left transition-colors ${
                   gameMode === m.id ? `${m.border} ${m.bg}` : "border-white/5 hover:border-white/10 bg-white/2"
                 }`}>
-                <m.icon className={`h-5 w-5 mt-0.5 flex-shrink-0 ${gameMode === m.id ? m.color : "text-white/20"}`} />
+                <m.icon className={`h-4 w-4 sm:h-5 sm:w-5 shrink-0 ${gameMode === m.id ? m.color : "text-white/20"}`} />
                 <div>
-                  <div className={`text-sm font-black ${gameMode === m.id ? m.color : "text-white/50"}`}>{m.label}</div>
-                  <div className="text-[11px] text-white/30 mt-0.5 leading-tight">{m.desc}</div>
+                  <div className={`text-xs font-black ${gameMode === m.id ? m.color : "text-white/50"}`}>{m.label}</div>
+                  <div className="text-[10px] text-white/30 mt-0.5 leading-tight hidden sm:block">{m.desc}</div>
                 </div>
               </button>
             ))}
@@ -271,7 +268,7 @@ export default function Home() {
         {gameMode === "challenge" && (
           <div className="mb-6">
             <h2 className="text-xs uppercase tracking-widest text-white/40 font-bold mb-3">Choose Challenge</h2>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {CHALLENGE_MODES.map(ch => (
                 <button key={ch.id} onClick={() => setChallengeId(ch.id)}
                   className={`p-4 rounded-xl border text-left transition-all ${
@@ -344,7 +341,7 @@ export default function Home() {
             {/* AI Difficulty */}
             <div>
               <h2 className="text-xs uppercase tracking-widest text-white/40 font-bold mb-4">AI Difficulty</h2>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {DIFFICULTIES.map((d) => {
                   const Icon = d.icon;
                   const isSelected = difficulty === d.id;
@@ -447,7 +444,7 @@ export default function Home() {
               )}
             </Button>
 
-            {!canStart && gameMode !== "watch" && (
+            {!canStart && (
               <p className="text-center text-xs text-white/20">Select a franchise to continue</p>
             )}
           </div>

@@ -163,13 +163,13 @@ export default function Season() {
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-1 mb-5 border border-white/5 rounded-xl p-1 bg-white/2 overflow-x-auto">
+            <div className="flex gap-1 mb-5 border border-white/5 rounded-xl p-1 bg-white/2 overflow-x-auto scrollbar-none">
               {tabs.map(tab => (
                 <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                  className={`flex-1 min-w-max flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
+                  className={`flex-1 min-w-max flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-colors whitespace-nowrap ${
                     activeTab === tab.id ? "bg-yellow-400 text-black" : "text-white/30 hover:text-white/60"
                   }`}>
-                  <tab.icon className="h-3 w-3" /> {tab.label}
+                  <tab.icon className="h-3 w-3 shrink-0" /><span className="hidden sm:inline">{tab.label}</span>
                 </button>
               ))}
             </div>
@@ -177,7 +177,8 @@ export default function Season() {
             {/* ── STANDINGS ───────────────────────────────────────────────── */}
             {activeTab === "standings" && (
               <div className="border border-white/5 rounded-xl overflow-hidden">
-                <table className="w-full text-sm">
+                <div className="overflow-x-auto scrollbar-none">
+                <table className="w-full text-sm min-w-[420px]">
                   <thead>
                     <tr className="border-b border-white/5 bg-white/2">
                       {["#", "Team", "P", "W", "L", "NRR", "Pts"].map(h => (
@@ -213,6 +214,7 @@ export default function Season() {
                     ))}
                   </tbody>
                 </table>
+                </div>
                 <div className="px-4 py-2 bg-white/1 border-t border-white/3">
                   <span className="text-[10px] text-white/20">✓ Top 4 qualify for playoffs · Qualifier 1, Eliminator, Qualifier 2, Final</span>
                 </div>

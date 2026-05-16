@@ -142,11 +142,65 @@
 @layer base {
   * {
     @apply border-border;
+    box-sizing: border-box;
   }
   html {
     background-color: hsl(var(--background));
+    /* Prevent layout shift from scrollbar appearing */
+    scrollbar-gutter: stable;
   }
   body {
     @apply font-sans antialiased bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Prevent horizontal overflow on mobile */
+    overflow-x: hidden;
   }
+}
+
+/* ─── Scrollbar utilities ────────────────────────────────────────────────── */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* ─── GPU-accelerated glow animations ───────────────────────────────────── */
+@keyframes soldPop {
+  0%   { transform: scale(0.7) rotate(-2deg); opacity: 0; }
+  60%  { transform: scale(1.05) rotate(1deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* ─── Prevent layout shift on animated elements ─────────────────────────── */
+.animate-pulse,
+.animate-spin,
+.animate-bounce {
+  will-change: transform, opacity;
+}
+
+/* ─── Smooth scrolling ───────────────────────────────────────────────────── */
+* {
+  scroll-behavior: smooth;
+}
+
+/* ─── Touch-friendly tap highlights ─────────────────────────────────────── */
+button, a {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* ─── Table mobile horizontal scroll ───────────────────────────────────── */
+.table-scroll-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ─── Prevent text selection in game UI ─────────────────────────────────── */
+.no-select {
+  -webkit-user-select: none;
+  user-select: none;
 }
